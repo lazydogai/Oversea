@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>竞品搜索分析平台</title>
+    <meta name="description" content="输入关键词，生成 Amazon 竞品数据、价格分布、评分分布、品牌集中度与 Listing 洞察报告。" />
+    <style>
+      :root {
+        --surface: #ffffff;
+        --surface-soft: #f7f7f8;
+        --ink: #111111;
+        --muted: #6b7280;
+        --line: #d9d9dd;
+        --accent: #e4002b;
+        --accent-dark: #b80022;
+        --good: #0f766e;
+        --shadow: 0 18px 48px rgba(17, 17, 17, 0.08);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--surface);
+        color: var(--ink);
+        font-family: "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+        letter-spacing: 0;
+      }
+      a { color: inherit; text-decoration: none; }
+      button, input, select { font: inherit; }
+      button { cursor: pointer; }
+      .app { min-height: 100vh; display: grid; grid-template-columns: 76px minmax(0, 1fr); }
+      .rail { border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 24px 0; }
+      .mark { width: 30px; height: 30px; background: var(--accent); }
+      .rail-text { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; color: var(--muted); white-space: nowrap; }
+      .page { min-width: 0; }
+      .topbar { border-bottom: 1px solid var(--line); padding: 22px clamp(20px, 5vw, 56px); display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+      .brand { display: flex; flex-direction: column; gap: 4px; }
+      .brand strong { font-size: 16px; }
+      .brand span { color: var(--muted); font-size: 13px; }
+      .nav { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .nav a, .ghost { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 13px; font-size: 14px; }
+      .primary { border: 1px solid var(--ink); background: var(--ink); color: var(--surface); padding: 10px 16px; font-size: 14px; }
+      .primary:hover { background: var(--accent); border-color: var(--accent); }
+      .hero { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr); border-bottom: 1px solid var(--line); }
+      .hero-copy { padding: clamp(32px, 7vw, 72px) clamp(20px, 5vw, 56px); border-right: 1px solid var(--line); }
+      .eyebrow { color: var(--accent); font-size: 13px; font-weight: 700; margin: 0 0 16px; }
+      h1 { margin: 0; max-width: 900px; font-size: clamp(42px, 7.5vw, 92px); line-height: 0.92; letter-spacing: 0; }
+      .lead { margin: 24px 0 0; max-width: 700px; color: var(--muted); font-size: clamp(16px, 2vw, 20px); line-height: 1.65; text-wrap: pretty; }
+      .search-card { margin-top: 34px; border: 1px solid var(--ink); box-shadow: var(--shadow); background: var(--surface); }
+      .search-row { display: grid; grid-template-columns: minmax(0, 1fr) 132px; }
+      .search-row input { border: 0; border-right: 1px solid var(--ink); padding: 18px; min-width: 0; font-size: 18px; }
+      .search-row button { border: 0; background: var(--accent); color: #fff; font-weight: 700; }
+      .search-meta { border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); }
+      .search-meta span { padding: 12px 16px; border-right: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+      .search-meta span:last-child { border-right: 0; }
+      .loading { display: none; margin-top: 16px; border: 1px solid var(--line); padding: 14px 16px; color: var(--muted); }
+      .loading.show { display: block; }
+      .hero-panel { padding: clamp(28px, 5vw, 56px); background: var(--surface-soft); display: grid; align-content: center; gap: 18px; }
+      .report-card { background: var(--surface); border: 1px solid var(--line); padding: 22px; box-shadow: var(--shadow); }
+      .report-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+      .report-head h2 { margin: 0; font-size: 22px; }
+      .label { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+      .badge { border: 1px solid var(--accent); color: var(--accent); padding: 6px 9px; font-size: 12px; white-space: nowrap; }
+      .kpis { display: grid; grid-template-columns: repeat(2, 1fr); border-left: 1px solid var(--line); border-top: 1px solid var(--line); margin-top: 18px; }
+      .kpi { padding: 16px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .kpi p { margin: 0; color: var(--muted); font-size: 12px; }
+      .kpi strong { display: block; margin-top: 10px; font-size: 30px; }
+      .bars { margin-top: 18px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 150px; border: 1px solid var(--line); padding: 18px; }
+      .bar { background: var(--ink); min-height: 18px; }
+      .bar:nth-child(2), .bar:nth-child(5) { background: var(--accent); }
+      .section { padding: clamp(30px, 5vw, 56px); border-bottom: 1px solid var(--line); }
+      .section-title { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 440px); gap: 24px; align-items: end; margin-bottom: 24px; }
+      .section-title h2 { margin: 0; font-size: clamp(30px, 4vw, 52px); line-height: 1; }
+      .section-title p { margin: 0; color: var(--muted); line-height: 1.6; text-wrap: pretty; }
+      .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+      .feature { min-height: 220px; padding: 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .feature span { color: var(--accent); font-weight: 700; font-size: 13px; }
+      .feature h3 { margin: 42px 0 12px; font-size: 22px; }
+      .feature p { margin: 0; color: var(--muted); line-height: 1.55; text-wrap: pretty; }
+      .dashboard { display: grid; grid-template-columns: 300px minmax(0, 1fr); border: 1px solid var(--line); }
+      .filters { padding: 20px; border-right: 1px solid var(--line); background: var(--surface-soft); display: grid; gap: 16px; align-content: start; }
+      .field label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 13px; }
+      .field select, .field input { width: 100%; border: 1px solid var(--line); background: var(--surface); padding: 11px 12px; }
+      .table-wrap { overflow: auto; }
+      table { width: 100%; border-collapse: collapse; min-width: 760px; }
+      th, td { border-bottom: 1px solid var(--line); padding: 14px 16px; text-align: left; font-size: 14px; vertical-align: top; }
+      th { color: var(--muted); font-weight: 500; background: var(--surface-soft); }
+      td strong { display: block; max-width: 360px; line-height: 1.35; }
+      .muted { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; }
+      .price { font-weight: 700; }
+      .link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+      .cta { background: var(--ink); color: var(--surface); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; }
+      .cta h2 { margin: 0; font-size: clamp(30px, 5vw, 64px); line-height: 1; }
+      .cta p { margin: 16px 0 0; color: #c9c9cf; line-height: 1.6; max-width: 680px; text-wrap: pretty; }
+      .cta .primary { background: var(--surface); color: var(--ink); border-color: var(--surface); }
+      footer { padding: 20px clamp(20px, 5vw, 56px); color: var(--muted); font-size: 13px; }
+      @media (max-width: 980px) {
+        .app { grid-template-columns: 1fr; }
+        .rail { display: none; }
+        .hero, .section-title, .dashboard, .cta { grid-template-columns: 1fr; }
+        .hero-copy { border-right: 0; border-bottom: 1px solid var(--line); }
+        .grid-3 { grid-template-columns: 1fr; }
+        .filters { border-right: 0; border-bottom: 1px solid var(--line); }
+      }
+      @media (max-width: 640px) {
+        .topbar { align-items: flex-start; flex-direction: column; }
+        .search-row, .search-meta, .kpis { grid-template-columns: 1fr; }
+        .search-row input { border-right: 0; border-bottom: 1px solid var(--ink); }
+        .search-row button { min-height: 52px; }
+        .search-meta span { border-right: 0; border-bottom: 1px solid var(--line); }
+        .search-meta span:last-child { border-bottom: 0; }
+        .cta .primary { width: 100%; text-align: center; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <aside class="rail" aria-label="页面标识">
+        <div class="mark"></div>
+        <div class="rail-text">COMPETITOR INTELLIGENCE</div>
+      </aside>
+      <div class="page">
+        <header class="topbar">
+          <a class="brand" href="#top" aria-label="返回顶部">
+            <strong>竞品搜索分析平台</strong>
+            <span>Amazon 市场报告 · Listing 洞察</span>
+          </a>
+          <nav class="nav" aria-label="主导航">
+            <a href="#features">功能</a>
+            <a href="#report">报表</a>
+            <a href="preview/index.html?data=sample">打开预览</a>
+          </nav>
+        </header>
+
+        <section id="top" class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">V1 LIVE PREVIEW</p>
+            <h1>输入关键词，生成可给客户看的竞品分析报告。</h1>
+            <p class="lead">为跨境卖家快速整理搜索结果、价格区间、评分分布、品牌集中度、图片与商品链接，并转成 Listing 优化方向。</p>
+            <form class="search-card" id="searchForm">
+              <div class="search-row">
+                <input id="keywordInput" name="keyword" value="desk lamp" aria-label="关键词" autocomplete="off" />
+                <button type="submit">开始分析</button>
+              </div>
+              <div class="search-meta">
+                <span>搜索范围：Top 50</span>
+                <span>报告语言：简体中文</span>
+                <span>输出：图表 + 商品表 + 洞察</span>
+              </div>
+            </form>
+            <div class="loading" id="loadingBox">正在准备报告页面，会用当前关键词打开预览。</div>
+          </div>
+
+          <div class="hero-panel" aria-label="报告摘要预览">
+            <div class="report-card">
+              <div class="report-head">
+                <div>
+                  <h2>desk lamp 市场快照</h2>
+                  <p class="label">当前演示配置</p>
+                </div>
+                <span class="badge">TOP 50</span>
+              </div>
+              <div class="kpis">
+                <div class="kpi"><p>样本商品</p><strong>50</strong></div>
+                <div class="kpi"><p>价格中位数</p><strong>$29</strong></div>
+                <div class="kpi"><p>平均评分</p><strong>4.4</strong></div>
+                <div class="kpi"><p>重点品牌</p><strong>12</strong></div>
+              </div>
+              <div class="bars" aria-label="价格分布示意图">
+                <div class="bar" style="height: 38%"></div>
+                <div class="bar" style="height: 78%"></div>
+                <div class="bar" style="height: 62%"></div>
+                <div class="bar" style="height: 44%"></div>
+                <div class="bar" style="height: 92%"></div>
+                <div class="bar" style="height: 58%"></div>
+                <div class="bar" style="height: 26%"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" class="section">
+          <div class="section-title">
+            <h2>明天 demo 要讲清楚的能力</h2>
+            <p>页面不会强调技术供应商，只呈现客户最关心的结果：搜到什么、价格在哪里、对手怎么卖、我们应该怎样切入。</p>
+          </div>
+          <div class="grid-3">
+            <article class="feature">
+              <span>01</span>
+              <h3>关键词即时搜索</h3>
+              <p>用户输入关键词后，系统按 Top 50 范围收集商品资料，并把每次搜索转成可复查的报告。</p>
+            </article>
+            <article class="feature">
+              <span>02</span>
+              <h3>竞品结构分析</h3>
+              <p>价格分布、评分分布、评论量、品牌集中度会集中呈现，方便判断市场是否拥挤和机会位在哪里。</p>
+            </article>
+            <article class="feature">
+              <span>03</span>
+              <h3>商品图片与链接</h3>
+              <p>报告表格会保留商品图、价格、评分、评论数与原商品链接，适合给运营和客户一起复盘。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="report" class="section">
+          <div class="section-title">
+            <h2>报表呈现方式</h2>
+            <p>用户可以按价格、评分、评论数和品牌过滤，快速从一堆商品里筛出高价位机会、低评分痛点和头部竞品。</p>
+          </div>
+          <div class="dashboard">
+            <aside class="filters" aria-label="筛选器示意">
+              <div class="field">
+                <label for="ratingFilter">最低评分</label>
+                <select id="ratingFilter">
+                  <option>不限</option>
+                  <option>4.5 星以上</option>
+                  <option>4.0 星以上</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="priceFilter">价格区间</label>
+                <select id="priceFilter">
+                  <option>全部价格</option>
+                  <option>$0 - $25</option>
+                  <option>$25 - $50</option>
+                  <option>$50 以上</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="brandFilter">品牌</label>
+                <input id="brandFilter" value="全部品牌" />
+              </div>
+            </aside>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>商品</th>
+                    <th>价格</th>
+                    <th>评分</th>
+                    <th>评论</th>
+                    <th>链接</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>LED Desk Lamp with Adjustable Arm</strong><span class="muted">护眼灯 · 办公桌灯</span></td>
+                    <td class="price">$29.99</td>
+                    <td>4.5</td>
+                    <td>8,420</td>
+                    <td><a class="link" href="preview/index.html?data=sample">查看报告</a></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Dimmable Table Lamp for Home Office</strong><span class="muted">触控调光 · USB 充电</span></td>
+                    <td class="price">$42.99</td>
+                    <td>4.3</td>
+                    <td>3,180</td>
+                    <td><a class="link" href="preview/index.html?data=sample">查看报告</a></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Clip-on Desk Light with Multiple Modes</strong><span class="muted">夹式设计 · 多色温</span></td>
+                    <td class="price">$18.99</td>
+                    <td>4.1</td>
+                    <td>1,204</td>
+                    <td><a class="link" href="preview/index.html?data=sample">查看报告</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="section cta">
+          <div>
+            <h2>准备好推上 Vercel 的首页入口。</h2>
+            <p>这个页面可以作为客户 demo 的第一屏：先解释产品价值，再用按钮进入真正的 report preview。</p>
+          </div>
+          <a class="primary" href="preview/index.html?data=sample">进入 V1 报告</a>
+        </section>
+
+        <footer>
+          <span>© 2026 竞品搜索分析平台 · V1 Preview</span>
+        </footer>
+      </div>
+    </main>
+    <script>
+      const form = document.getElementById("searchForm");
+      const input = document.getElementById("keywordInput");
+      const loading = document.getElementById("loadingBox");
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const keyword = (input.value || "desk lamp").trim();
+        loading.classList.add("show");
+        loading.textContent = `正在打开 ${keyword} 的 V1 报告预览...`;
+        const params = new URLSearchParams({
+          api: "http://127.0.0.1:8001/api/v1",
+          top_n: "50",
+          v: "live-v1",
+          q: keyword,
+        });
+        window.setTimeout(() => {
+          window.location.href = `preview/index.html?${params.toString()}`;
+        }, 450);
+      });
+    </script>
+  </body>
+</html>
