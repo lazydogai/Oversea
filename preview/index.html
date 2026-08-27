@@ -1035,7 +1035,13 @@
           });
 
           if (!response.ok) {
-            throw new Error(`任务创建失败（${response.status}）`);
+            let errorPayload = {};
+            try {
+              errorPayload = await response.json();
+            } catch (_error) {
+              // Keep the HTTP status when the API does not return JSON.
+            }
+            throw new Error(errorPayload.error_message || errorPayload.error || `任务创建失败（${response.status}）`);
           }
 
           const job = await response.json();
