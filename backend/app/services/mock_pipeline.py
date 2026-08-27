@@ -60,7 +60,7 @@ async def _run_job(job_id: UUID) -> None:
         job["updated_at"] = _now_iso()
 
         if not APIFY.is_configured:
-            raise RuntimeError("实时数据源未配置，请检查服务器环境变量。")
+            raise RuntimeError("实时数据源未配置，缺少：" + "、".join(APIFY.missing_config))
 
         products = await APIFY.search_top_products(job["keyword"], job["locale"], job["top_n"])
         if not products:

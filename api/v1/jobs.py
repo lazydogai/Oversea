@@ -67,7 +67,7 @@ def _price_distribution(prices: list[float]) -> list[dict[str, Any]]:
 def _completed_job(keyword: str, platform: str, locale: str, top_n: int) -> dict[str, Any]:
     scraper = ApifyAmazonScraperService(debug_mode=False)
     if not scraper.is_configured:
-        raise RuntimeError("实时数据源未配置，请检查服务器环境变量。")
+        raise RuntimeError("实时数据源未配置，缺少：" + "、".join(scraper.missing_config))
 
     products = asyncio.run(scraper.search_top_products(keyword, locale, top_n))
     if not products:

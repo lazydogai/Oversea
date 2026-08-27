@@ -181,8 +181,17 @@ class ApifyAmazonScraperService:
         self.timeout_seconds = timeout_seconds if timeout_seconds is not None else settings.apify_timeout_seconds
 
     @property
+    def missing_config(self) -> list[str]:
+        missing: list[str] = []
+        if not self.api_token:
+            missing.append("APIFY_API_TOKEN 或 APIFY_TOKEN")
+        if not self.actor_id:
+            missing.append("APIFY_AMAZON_SCRAPER_ACTOR_ID 或 APIFY_AMAZON_SEARCH_ACTOR")
+        return missing
+
+    @property
     def is_configured(self) -> bool:
-        return bool(self.api_token and self.actor_id)
+        return not self.missing_config
 
     def _build_run_input(self, keyword: str, locale: str, limit: int) -> dict[str, Any]:
         run_limit = 10 if self.debug_mode else min(limit, 50)
