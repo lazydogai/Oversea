@@ -130,18 +130,18 @@
           <nav class="nav" aria-label="主导航">
             <a href="#features">功能</a>
             <a href="#report">报表</a>
-            <a href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">打开预览</a>
+            <a href="preview/index.html?top_n=50&v=live-v1">进入报告</a>
           </nav>
         </header>
 
         <section id="top" class="hero">
           <div class="hero-copy">
-            <p class="eyebrow">V1 LIVE PREVIEW</p>
-            <h1>输入关键词，生成可给客户看的竞品分析报告。</h1>
+            <p class="eyebrow">V1 MARKET REPORT</p>
+            <h1>输入关键词，生成可交付的竞品分析报告。</h1>
             <p class="lead">为跨境卖家快速整理搜索结果、价格区间、评分分布、品牌集中度、图片与商品链接，并转成 Listing 优化方向。</p>
             <form class="search-card" id="searchForm">
               <div class="search-row">
-                <input id="keywordInput" name="keyword" value="desk lamp" aria-label="关键词" autocomplete="off" />
+                <input id="keywordInput" name="keyword" value="" placeholder="例如：wireless mouse" aria-label="关键词" autocomplete="off" />
                 <button type="submit">开始分析</button>
               </div>
               <div class="search-meta">
@@ -150,32 +150,26 @@
                 <span>输出：图表 + 商品表 + 洞察</span>
               </div>
             </form>
-            <div class="loading" id="loadingBox">正在准备报告页面，会用当前关键词打开预览。</div>
+            <div class="loading" id="loadingBox">正在准备报告页面，会用当前关键词进入报告。</div>
           </div>
 
-          <div class="hero-panel" aria-label="报告摘要预览">
+          <div class="hero-panel" aria-label="报告摘要">
             <div class="report-card">
               <div class="report-head">
                 <div>
-                  <h2>desk lamp 市场快照</h2>
-                  <p class="label">当前演示配置</p>
+                  <h2>市场报告摘要</h2>
+                  <p class="label">输入关键词后生成</p>
                 </div>
-                <span class="badge">TOP 50</span>
+                <span class="badge">待搜索</span>
               </div>
               <div class="kpis">
-                <div class="kpi"><p>样本商品</p><strong>50</strong></div>
-                <div class="kpi"><p>价格中位数</p><strong>$29</strong></div>
-                <div class="kpi"><p>平均评分</p><strong>4.4</strong></div>
-                <div class="kpi"><p>重点品牌</p><strong>12</strong></div>
+                <div class="kpi"><p>样本商品</p><strong>—</strong></div>
+                <div class="kpi"><p>价格中位数</p><strong>—</strong></div>
+                <div class="kpi"><p>平均评分</p><strong>—</strong></div>
+                <div class="kpi"><p>重点品牌</p><strong>—</strong></div>
               </div>
-              <div class="bars" aria-label="价格分布示意图">
-                <div class="bar" style="height: 38%"></div>
-                <div class="bar" style="height: 78%"></div>
-                <div class="bar" style="height: 62%"></div>
-                <div class="bar" style="height: 44%"></div>
-                <div class="bar" style="height: 92%"></div>
-                <div class="bar" style="height: 58%"></div>
-                <div class="bar" style="height: 26%"></div>
+                            <div class="bars" aria-label="价格分布">
+                <div style="grid-column: 1 / -1; align-self: center; color: var(--muted); font-size: 13px;">完成一次搜索后显示价格分布</div>
               </div>
             </div>
           </div>
@@ -183,8 +177,8 @@
 
         <section id="features" class="section">
           <div class="section-title">
-            <h2>明天 demo 要讲清楚的能力</h2>
-            <p>页面不会强调技术供应商，只呈现客户最关心的结果：搜到什么、价格在哪里、对手怎么卖、我们应该怎样切入。</p>
+            <h2>V1 核心能力</h2>
+            <p>平台聚焦客户最关心的结果：搜到什么、价格在哪里、对手怎么卖、我们应该怎样切入。</p>
           </div>
           <div class="grid-3">
             <article class="feature">
@@ -234,55 +228,20 @@
                 <input id="brandFilter" value="全部品牌" />
               </div>
             </aside>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>商品</th>
-                    <th>价格</th>
-                    <th>评分</th>
-                    <th>评论</th>
-                    <th>链接</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>LED Desk Lamp with Adjustable Arm</strong><span class="muted">护眼灯 · 办公桌灯</span></td>
-                    <td class="price">$29.99</td>
-                    <td>4.5</td>
-                    <td>8,420</td>
-                    <td><a class="link" href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">查看报告</a></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Dimmable Table Lamp for Home Office</strong><span class="muted">触控调光 · USB 充电</span></td>
-                    <td class="price">$42.99</td>
-                    <td>4.3</td>
-                    <td>3,180</td>
-                    <td><a class="link" href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">查看报告</a></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Clip-on Desk Light with Multiple Modes</strong><span class="muted">夹式设计 · 多色温</span></td>
-                    <td class="price">$18.99</td>
-                    <td>4.1</td>
-                    <td>1,204</td>
-                    <td><a class="link" href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">查看报告</a></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <div class="table-wrap"><div style="padding: 24px; color: var(--muted);">完成一次搜索后，这里会显示商品图片、价格、评分、评论数和商品链接。</div></div>
           </div>
         </section>
 
         <section class="section cta">
           <div>
-            <h2>准备好推上 Vercel 的首页入口。</h2>
-            <p>这个页面可以作为客户 demo 的第一屏：先解释产品价值，再用按钮进入真正的 report preview。</p>
+            <h2>从关键词到市场报告的入口。</h2>
+            <p>用户输入关键词后即可进入报告页面，查看价格、评分、品牌集中度、商品图片、链接与 Listing 建议。</p>
           </div>
-          <a class="primary" href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">进入 V1 报告</a>
+          <a class="primary" href="preview/index.html?top_n=50&v=live-v1">进入市场报告</a>
         </section>
 
         <footer>
-          <span>© 2026 竞品搜索分析平台 · V1 Preview</span>
+          <span>© 2026 竞品搜索分析平台 · V1</span>
         </footer>
       </div>
     </main>
@@ -292,9 +251,9 @@
       const loading = document.getElementById("loadingBox");
       form.addEventListener("submit", (event) => {
         event.preventDefault();
-        const keyword = (input.value || "desk lamp").trim();
+        const keyword = input.value.trim();
         loading.classList.add("show");
-        loading.textContent = `正在打开 ${keyword} 的 V1 报告预览...`;
+        loading.textContent = `正在打开 ${keyword} 的 V1 报告...`;
         const params = new URLSearchParams({
           top_n: "50",
           v: "live-v1",
@@ -312,5 +271,8 @@
     </script>
   </body>
 </html>
+
+
+
 
 

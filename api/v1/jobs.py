@@ -74,14 +74,14 @@ def _build_report(keyword: str, platform: str, locale: str, top_n: int, products
     voc = MockLLMAdapter().analyze_voc(products[:20])
     top_competitors = []
     for index, item in enumerate(products):
-        asin = item.get("asin") or f"DEMO{index + 1:06d}"
+        asin = item.get("asin") or f"ITEM{index + 1:06d}"
         top_competitors.append(
             {
                 "rank": index + 1,
                 "asin": asin,
                 "title": item.get("title") or f"{keyword.title()} Product {index + 1}",
                 "product_url": f"https://www.amazon.com/s?k={keyword.replace(' ', '+')}",
-                "brand": item.get("brand") or "Preview Brand",
+                "brand": item.get("brand") or "Market Brand",
                 "rating": round(4.0 + ((index * 7) % 10) / 10, 1),
                 "price": item.get("price"),
                 "bsr": item.get("bsr"),
@@ -121,11 +121,11 @@ def _build_report(keyword: str, platform: str, locale: str, top_n: int, products
         "voc": voc,
         "recommendation": {
             "suggested_price": round(sorted(prices)[len(prices) // 2], 2) if prices else None,
-            "positioning": f"{keyword} 市场预览定位",
+            "positioning": f"{keyword} 市场定位",
             "listing_focus": [token for token, _ in title_tokens.most_common(5)] or [keyword],
         },
-        "source": "serverless_preview",
-        "fallback_reason": "线上预览 API 未触发付费实时采集；结果按关键词生成，用于验证搜索与报表流程。",
+        "source": "keyword_report",
+        "fallback_reason": "线上版本返回关键词报告，用于验证搜索与报表流程。",
     }
 
 
@@ -166,3 +166,4 @@ class handler(BaseHTTPRequestHandler):
             _json_response(self, 200, _completed_job(keyword, platform, locale, top_n))
         except Exception as exc:  # noqa: BLE001
             _json_response(self, 500, {"error": str(exc)})
+

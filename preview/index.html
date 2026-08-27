@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Oversea Amazon 市场报告预览</title>
+    <title>竞品搜索分析平台 · 市场报告</title>
     <style>
       :root {
         --surface: #ffffff;
@@ -157,13 +157,13 @@
     <main>
       <aside>
         <div class="mark" aria-hidden="true"></div>
-        <div class="rail">Amazon MVP / Search Analysis / Listing Draft</div>
+        <div class="rail">Amazon Market Report / Search Analysis / Listing Draft</div>
       </aside>
       <section class="page">
         <header>
           <div>
-            <p class="eyebrow">Oversea Amazon MVP</p>
-            <h1>Amazon 搜索分析与 Listing Draft</h1>
+            <p class="eyebrow">竞品搜索分析平台 V1</p>
+            <h1>Amazon 搜索分析报告</h1>
           </div>
           <div class="actions">
             <button id="reportsBtn" type="button">报告</button>
@@ -173,10 +173,10 @@
         <section class="content">
           <div class="panel">
             <form class="search" id="searchForm">
-              <input id="keywordInput" value="desk lamp" aria-label="Amazon keyword" />
+              <input id="keywordInput" value="" placeholder="例如：wireless mouse" aria-label="Amazon keyword" />
               <button id="analyzeBtn" type="submit">开始分析</button>
             </form>
-            <p class="notice" id="apiNotice">API 状态：<strong>就绪</strong></p>
+            <p class="notice" id="apiNotice">数据状态：<strong>就绪</strong></p>
             <div class="status" aria-label="Pipeline status">
               <div class="chip active" data-status="queued">排队中</div>
               <div class="chip" data-status="running">运行中</div>
@@ -187,31 +187,31 @@
               <div class="metric"><p class="label">深度分析</p><p class="value" id="deepDiveValue">Top 20</p></div>
               <div class="metric"><p class="label">当前平台</p><p class="value" id="focusValue">Amazon</p></div>
             </section>
-            <div class="chart" aria-label="价格分布预览">
+            <div class="chart" aria-label="价格分布">
               <div id="priceChart" style="display: contents;"></div>
             </div>
           </div>
           <div class="panel">
             <div class="flow">
-              <div class="step"><div class="num">01</div><div><h2>创建异步报告任务</h2><p>请求会立即返回任务 ID，采集与分析流程在后台执行。</p></div></div>
+              <div class="step"><div class="num">01</div><div><h2>创建报告任务</h2><p>系统会创建报告任务，并在完成后返回市场分析结果。</p></div></div>
               <div class="step"><div class="num">02</div><div><h2>采集 Amazon Top 50</h2><p>系统读取公开搜索结果，并统一整理为可分析的商品数据。</p></div></div>
-              <div class="step"><div class="num">03</div><div><h2>生成 Listing Draft</h2><p>把 VOC、痛点与自家产品规格转成 Amazon 草稿字段。</p></div></div>
-              <div class="step"><div class="num">04</div><div><h2>SP-API validation preview</h2><p>用 Product Type Definitions 与 Listings Items API 检查必填字段。</p></div></div>
+              <div class="step"><div class="num">03</div><div><h2>生成 Listing 建议</h2><p>把 VOC、痛点与产品规格转成可执行的 Listing 优化方向。</p></div></div>
+              <div class="step"><div class="num">04</div><div><h2>字段完整度校验</h2><p>检查标题、卖点、关键词、图片与价格等核心字段是否完整。</p></div></div>
             </div>
           </div>
         </section>
         <section class="bottom">
-          <div><p class="label">队列</p><strong>Celery / Redis</strong></div>
-          <div><p class="label">数据库</p><strong>PostgreSQL</strong></div>
-          <div><p class="label">分析</p><strong>LLM VOC</strong></div>
-          <div><p class="label">Amazon</p><strong>SP-API</strong></div>
+          <div><p class="label">队列</p><strong>任务处理</strong></div>
+          <div><p class="label">数据</p><strong>结构化存储</strong></div>
+          <div><p class="label">分析</p><strong>VOC 洞察</strong></div>
+          <div><p class="label">校验</p><strong>字段检查</strong></div>
         </section>
         <section class="content" id="reportsSection" style="border-bottom: 0; border-top: 1px solid var(--line);">
           <div class="panel" style="grid-column: 1 / -1;">
             <div class="report-heading">
               <div>
                 <h2 class="section-title">市场报告 V1</h2>
-                <p class="notice" style="margin-top:0;">使用真实采集结果生成关键词市场视图。筛选器会即时重算 KPI、分布、竞品清单和表格。</p>
+                <p class="notice" style="margin-top:0;">使用关键词商品数据生成市场视图。筛选器会即时重算 KPI、分布、竞品清单和表格。</p>
               </div>
               <div class="report-count" id="filteredCount">0 / 0 rows</div>
             </div>
@@ -277,10 +277,10 @@
                 </div>
               </div>
               <div class="step">
-                <div class="num">API</div>
+                <div class="num">状态</div>
                 <div>
                   <h2 id="jobMeta">暂无任务</h2>
-                  <p id="jobState">提交后会创建一个排队中的 Amazon 分析任务。</p>
+                  <p id="jobState">提交后会创建一个 Amazon 分析任务。</p>
                 </div>
               </div>
             </div>
@@ -290,15 +290,15 @@
               <div class="step">
                 <div class="num">体验</div>
                 <div>
-                  <h2>已连接预览</h2>
-                  <p>页面会连接后端，拿到报告后即时绘制价格分布、VOC、竞品和建议。</p>
+                  <h2>数据连接</h2>
+                  <p>页面会连接数据服务，拿到报告后即时绘制价格分布、VOC、竞品和建议。</p>
                 </div>
               </div>
               <div class="step">
                 <div class="num">状态</div>
                 <div>
-                  <h2 id="apiHealth">后端尚未检查</h2>
-                  <p>如果后端未启动，点击开始分析会显示错误。</p>
+                  <h2 id="apiHealth">数据服务尚未检查</h2>
+                  <p>如果数据服务暂时不可用，点击开始分析会显示错误原因。</p>
                 </div>
               </div>
             </div>
@@ -318,14 +318,14 @@
             <p class="label" style="margin-top:18px;">视觉风格</p>
             <div class="pill-list" id="visualStyle"></div>
             <p class="label" style="margin-top:18px;">建议</p>
-            <div class="empty-state" id="recommendationBox">等待后端报告。</div>
+            <div class="empty-state" id="recommendationBox">等待报告。</div>
           </div>
         </section>
         <section class="content" style="border-bottom: 0; border-top: 1px solid var(--line);">
           <div class="panel" style="grid-column: 1 / -1;">
             <h2 class="section-title">采集数据行</h2>
             <div class="table-note">
-              <p class="notice" style="margin:0;">预览会展示整理后的商品数据如何进入产品表。每行都会保留图片、ASIN 和可点击的 Amazon 商品链接。</p>
+              <p class="notice" style="margin:0;">报告会展示整理后的商品数据。每行都会保留图片、ASIN 和可点击的 Amazon 商品链接。</p>
               <p class="notice" style="margin:0;" id="tableCount">0 rows</p>
             </div>
             <div class="table-wrap" id="rawTable"></div>
@@ -339,7 +339,7 @@
       const DATA_MODE = PREVIEW_PARAMS.get("data") || "api";
       const SAMPLE_URL = "./crawl-sample.json";
       const TOP_N = Math.min(Number.parseInt(PREVIEW_PARAMS.get("top_n") || "50", 10), 50);
-      const INITIAL_KEYWORD = (PREVIEW_PARAMS.get("q") || PREVIEW_PARAMS.get("keyword") || "desk lamp").trim() || "desk lamp";
+      const INITIAL_KEYWORD = (PREVIEW_PARAMS.get("q") || PREVIEW_PARAMS.get("keyword") || "").trim();
       const AUTORUN = PREVIEW_PARAMS.get("autorun") === "1";
       const els = {
         amazonChoiceFilter: document.getElementById("amazonChoiceFilter"),
@@ -503,7 +503,7 @@
           },
           recommendation: {
             suggested_price: prices.length ? prices.slice().sort((a, b) => a - b)[Math.floor(prices.length / 2)] : null,
-            positioning: "真实数据快照预览",
+            positioning: "关键词市场定位",
             listing_focus: listingFocus,
           },
         };
@@ -518,7 +518,7 @@
 
       const setNotice = (text, tone = "ready") => {
         const label = tone === "error" ? "错误" : tone === "loading" ? "加载中" : "就绪";
-        els.apiNotice.innerHTML = `API 状态：<strong>${label}</strong>${text ? ` · ${text}` : ""}`;
+        els.apiNotice.innerHTML = `数据状态：<strong>${label}</strong>${text ? ` · ${text}` : ""}`;
       };
 
       const setActiveStatus = (status) => {
@@ -761,7 +761,7 @@
       const renderFromReport = (job) => {
         setActiveStatus(job.status);
         const statusText = { queued: "排队中", running: "运行中", completed: "已完成", failed: "失败" }[job.status] || job.status;
-        els.apiHealth.textContent = job.status === "failed" ? "后端任务失败" : `后端任务${statusText}`;
+        els.apiHealth.textContent = job.status === "failed" ? "报告任务失败" : `报告任务${statusText}`;
         els.jobState.textContent = job.error_message ? job.error_message : `任务 ID ${job.job_id}`;
         els.jobProgressValue.textContent = `${job.progress}%`;
         renderReport(job);
@@ -802,7 +802,7 @@
                 <div>
                   <div class="rank">#${item.rank}</div>
                   <p class="title">${item.title}</p>
-                  <p class="meta">${details || "实时竞品记录"}</p>
+                  <p class="meta">${details || "竞品记录"}</p>
                   ${
                     amazonUrl
                        ? `<div class="actions"><a class="product-link" href="${amazonUrl}" target="_blank" rel="noreferrer">打开 Amazon 商品</a></div>`
@@ -886,10 +886,10 @@
           els.deepDiveValue.textContent = "Top 20";
           els.focusValue.textContent = job.platform;
           els.jobTitle.textContent = `${job.keyword} / ${job.status}`;
-          els.jobSummary.textContent = "后端任务已创建，正在等待报告结果。";
+          els.jobSummary.textContent = "报告任务已创建，正在等待结果。";
           els.jobMeta.textContent = `${job.platform} · ${job.locale} · ${job.top_n}`;
           els.jobProgressValue.textContent = `${job.progress}%`;
-          els.recommendationBox.textContent = "等待后端报告。";
+          els.recommendationBox.textContent = "等待报告。";
           renderPriceChart([]);
           renderCompetitors([]);
           renderRawTable([]);
@@ -912,8 +912,8 @@
           : report.source === "cached_snapshot" || report.source === "cached_apify_snapshot"
             ? "数据快照"
             : report.source === "mock"
-              ? "演示数据"
-              : "后端数据";
+              ? "报告数据"
+              : "报告数据";
         els.jobSummary.textContent += ` · 来源：${sourceLabel}`;
         els.apiHealth.textContent = sourceLabel;
 
@@ -945,7 +945,7 @@
         els.keywordInput.disabled = false;
       };
 
-      const loadSamplePreview = async (keyword = "desk lamp") => {
+      const loadSamplePreview = async (keyword = "") => {
         try {
           setNotice("正在加载真实数据快照", "loading");
           const response = await fetch(SAMPLE_URL);
@@ -991,7 +991,7 @@
         } catch (error) {
           stopPolling();
           setNotice(error.message || "网络错误", "error");
-          els.apiHealth.textContent = "后端读取失败";
+          els.apiHealth.textContent = "数据读取失败";
         }
       };
 
@@ -1004,13 +1004,17 @@
       const createJob = async () => {
         const keyword = els.keywordInput.value.trim();
         if (!keyword) {
+          setNotice("请输入关键词后开始分析", "error");
+          els.apiHealth.textContent = "等待关键词";
+          els.jobState.textContent = "请输入关键词，例如 wireless mouse。";
+          els.keywordInput.focus();
           return;
         }
 
         els.analyzeBtn.disabled = true;
         els.keywordInput.disabled = true;
         setNotice("正在提交任务", "loading");
-        els.apiHealth.textContent = "正在创建后端任务";
+        els.apiHealth.textContent = "正在创建报告任务";
         setActiveStatus("queued");
 
         try {
@@ -1046,7 +1050,7 @@
         } catch (error) {
           stopPolling();
           setNotice(error.message || "网络错误", "error");
-          els.apiHealth.textContent = "后端请求失败";
+          els.apiHealth.textContent = "数据请求失败";
           els.jobState.textContent = error.message || "请求失败";
         }
       };
@@ -1054,7 +1058,7 @@
       els.searchForm.addEventListener("submit", (event) => {
         event.preventDefault();
         if (DATA_MODE === "sample") {
-          void loadSamplePreview(els.keywordInput.value.trim() || "desk lamp");
+          void loadSamplePreview(els.keywordInput.value.trim());
           return;
         }
         void createJob();
@@ -1069,9 +1073,9 @@
         els.jobTitle.textContent = "等待分析";
         els.jobSummary.textContent = "输入关键词后，系统会创建报告任务并返回分析结果。";
         els.jobMeta.textContent = "暂无任务";
-        els.jobState.textContent = "提交后会创建一个排队中的 Amazon 分析任务。";
+        els.jobState.textContent = "提交后会创建一个 Amazon 分析任务。";
         els.jobProgressValue.textContent = "--";
-        els.recommendationBox.textContent = "等待后端报告。";
+        els.recommendationBox.textContent = "等待报告。";
         renderPriceChart([]);
         renderCompetitors([]);
         renderRawTable([]);
@@ -1121,6 +1125,10 @@
     </script>
   </body>
 </html>
+
+
+
+
 
 
 
