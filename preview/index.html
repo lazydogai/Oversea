@@ -335,10 +335,12 @@
     </main>
     <script>
       const PREVIEW_PARAMS = new URLSearchParams(window.location.search);
-      const API_BASE = PREVIEW_PARAMS.get("api") || "http://127.0.0.1:8001/api/v1";
+      const API_BASE = PREVIEW_PARAMS.get("api") || `${window.location.origin}/api/v1`;
       const DATA_MODE = PREVIEW_PARAMS.get("data") || "api";
       const SAMPLE_URL = "./crawl-sample.json";
       const TOP_N = Math.min(Number.parseInt(PREVIEW_PARAMS.get("top_n") || "50", 10), 50);
+      const INITIAL_KEYWORD = (PREVIEW_PARAMS.get("q") || PREVIEW_PARAMS.get("keyword") || "desk lamp").trim() || "desk lamp";
+      const AUTORUN = PREVIEW_PARAMS.get("autorun") === "1";
       const els = {
         amazonChoiceFilter: document.getElementById("amazonChoiceFilter"),
         analyzeBtn: document.getElementById("analyzeBtn"),
@@ -381,6 +383,8 @@
 
       let pollTimer = null;
       let currentReport = null;
+
+      els.keywordInput.value = INITIAL_KEYWORD;
 
       const toNumber = (value) => {
         const n = Number(value);
@@ -1052,7 +1056,7 @@
 
       els.newSearchBtn.addEventListener("click", () => {
         stopPolling();
-        els.keywordInput.value = "desk lamp";
+        els.keywordInput.value = INITIAL_KEYWORD;
         els.keywordInput.focus();
         setNotice("就绪");
         setActiveStatus("queued");
@@ -1094,7 +1098,7 @@
       els.resetFiltersBtn.addEventListener("click", resetFilters);
 
       if (DATA_MODE === "sample") {
-        void loadSamplePreview();
+        void loadSamplePreview(INITIAL_KEYWORD);
       } else {
         setNotice("就绪");
         renderPriceChart([]);
@@ -1104,7 +1108,16 @@
         renderList(els.painPoints, [], "暂无痛点。");
         renderList(els.sellingPoints, [], "暂无卖点。");
         renderList(els.visualStyle, [], "暂无视觉风格。");
+        if (AUTORUN) {
+          void createJob();
+        }
       }
     </script>
   </body>
 </html>
+
+
+
+
+
+

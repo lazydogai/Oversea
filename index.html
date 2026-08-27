@@ -130,7 +130,7 @@
           <nav class="nav" aria-label="主导航">
             <a href="#features">功能</a>
             <a href="#report">报表</a>
-            <a href="preview/index.html?data=sample">打开预览</a>
+            <a href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">打开预览</a>
           </nav>
         </header>
 
@@ -251,21 +251,21 @@
                     <td class="price">$29.99</td>
                     <td>4.5</td>
                     <td>8,420</td>
-                    <td><a class="link" href="preview/index.html?data=sample">查看报告</a></td>
+                    <td><a class="link" href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">查看报告</a></td>
                   </tr>
                   <tr>
                     <td><strong>Dimmable Table Lamp for Home Office</strong><span class="muted">触控调光 · USB 充电</span></td>
                     <td class="price">$42.99</td>
                     <td>4.3</td>
                     <td>3,180</td>
-                    <td><a class="link" href="preview/index.html?data=sample">查看报告</a></td>
+                    <td><a class="link" href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">查看报告</a></td>
                   </tr>
                   <tr>
                     <td><strong>Clip-on Desk Light with Multiple Modes</strong><span class="muted">夹式设计 · 多色温</span></td>
                     <td class="price">$18.99</td>
                     <td>4.1</td>
                     <td>1,204</td>
-                    <td><a class="link" href="preview/index.html?data=sample">查看报告</a></td>
+                    <td><a class="link" href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">查看报告</a></td>
                   </tr>
                 </tbody>
               </table>
@@ -278,7 +278,7 @@
             <h2>准备好推上 Vercel 的首页入口。</h2>
             <p>这个页面可以作为客户 demo 的第一屏：先解释产品价值，再用按钮进入真正的 report preview。</p>
           </div>
-          <a class="primary" href="preview/index.html?data=sample">进入 V1 报告</a>
+          <a class="primary" href="preview/index.html?top_n=50&v=live-v1&q=desk%20lamp">进入 V1 报告</a>
         </section>
 
         <footer>
@@ -296,11 +296,15 @@
         loading.classList.add("show");
         loading.textContent = `正在打开 ${keyword} 的 V1 报告预览...`;
         const params = new URLSearchParams({
-          api: "http://127.0.0.1:8001/api/v1",
           top_n: "50",
           v: "live-v1",
           q: keyword,
+          autorun: "1",
         });
+        const configuredApi = new URLSearchParams(window.location.search).get("api");
+        if (configuredApi) {
+          params.set("api", configuredApi);
+        }
         window.setTimeout(() => {
           window.location.href = `preview/index.html?${params.toString()}`;
         }, 450);
@@ -308,3 +312,5 @@
     </script>
   </body>
 </html>
+
+
