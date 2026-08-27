@@ -1032,6 +1032,12 @@
           }
 
           const job = await response.json();
+          renderJob(job);
+          if (job.report || job.status === "completed" || job.status === "failed") {
+            stopPolling();
+            setNotice(job.status === "completed" ? "报告已生成" : job.error_message || "任务失败", job.status === "completed" ? "ready" : "error");
+            return;
+          }
           els.apiHealth.textContent = "任务已排队";
           els.jobState.textContent = `任务 ID ${job.job_id}`;
           els.jobTitle.textContent = `${keyword} / ${job.status}`;
@@ -1115,6 +1121,8 @@
     </script>
   </body>
 </html>
+
+
 
 
 
