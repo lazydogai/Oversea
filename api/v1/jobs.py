@@ -75,12 +75,18 @@ def _build_report(keyword: str, platform: str, locale: str, top_n: int, products
     top_competitors = []
     for index, item in enumerate(products):
         asin = item.get("asin") or f"ITEM{index + 1:06d}"
+        product_url = (
+            item.get("product_url")
+            or item.get("productUrl")
+            or item.get("url")
+            or (f"https://www.amazon.com/dp/{asin}" if asin else "")
+        )
         top_competitors.append(
             {
                 "rank": index + 1,
                 "asin": asin,
                 "title": item.get("title") or f"{keyword.title()} Product {index + 1}",
-                "product_url": f"https://www.amazon.com/s?k={keyword.replace(' ', '+')}",
+                "product_url": product_url,
                 "brand": item.get("brand") or "Market Brand",
                 "rating": round(4.0 + ((index * 7) % 10) / 10, 1),
                 "price": item.get("price"),
