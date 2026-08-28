@@ -34,6 +34,13 @@ def _apify_runtime_diagnostic() -> str:
     return f"运行环境：{environment}；检测到：{names}"
 
 
+def _safe_error_message(exc: Exception) -> str:
+    message = str(exc).strip() or type(exc).__name__
+    for name, value in os.environ.items():
+        if name.startswith("APIFY") and value:
+            message = message.replace(value, "[已隐藏]")
+    return message[:500]
+
 def _json_response(handler: BaseHTTPRequestHandler, status: int, payload: dict[str, Any]) -> None:
     body = json.dumps(payload, ensure_ascii=False, default=str).encode("utf-8")
     handler.send_response(status)
@@ -125,4 +132,5 @@ class handler(BaseHTTPRequestHandler):
             status = 503 if "未配置" in message else 502
             _json_response(self, status, {"status": "failed", "error_message": message, "error": message})
         except Exception as exc:  # noqa: BLE001
-            _json_response(self, 502, {"status": "failed", "error_message": "实时数据采集失败，请稍后重试。", "error": str(exc)})
+            detail = _safe_error_message(exc)
+            _json_response(self, 502, {"status": "failed", "error_message": "实时数据采集失败：" + detail, "error": detail})
