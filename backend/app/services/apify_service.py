@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import math
 import re
 from collections import Counter
@@ -213,11 +214,14 @@ class ApifyAmazonScraperService:
         run_input = self._build_run_input(keyword=keyword, locale=locale, limit=limit)
 
         def _run() -> list[dict[str, Any]]:
-            client = ApifyClient(
-                self.api_token,
-                max_retries=2,
-                timeout_secs=self.timeout_seconds,
-            )
+            # Keep optional constructor arguments compatible with the deployed SDK version.
+            supported_kwargs = inspect.signature(ApifyClient).parameters
+            client_kwargs: dict[str, Any] = {}
+            if "max_retries" in supported_kwargs:
+                client_kwargs["max_retries"] = 2
+            if "timeout_secs" in supported_kwargs:
+                client_kwargs["timeout_secs"] = self.timeout_seconds
+            client = ApifyClient(self.api_token, **client_kwargs)
             run = client.actor(self.actor_id).call(run_input=run_input)
             dataset_id = run.get("defaultDatasetId") if isinstance(run, dict) else getattr(run, "default_dataset_id", None)
             if not dataset_id:
