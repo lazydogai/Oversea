@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler
@@ -21,6 +22,16 @@ MAX_TOP_N = 50
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _apify_runtime_diagnostic() -> str:
+    """Return variable names only, so failures are debuggable without leaking secrets."""
+    detected = sorted(
+        name for name, value in os.environ.items() if name.startswith("APIFY") and value.strip()
+    )
+    environment = os.getenv("VERCEL_ENV") or "unknown"
+    names = "、".join(detected) if detected else "没有检测到任何非空 APIFY_* 变量"
+    return f"运行环境：{environment}；检测到：{names}"
 
 
 def _json_response(handler: BaseHTTPRequestHandler, status: int, payload: dict[str, Any]) -> None:
@@ -67,7 +78,12 @@ def _price_distribution(prices: list[float]) -> list[dict[str, Any]]:
 def _completed_job(keyword: str, platform: str, locale: str, top_n: int) -> dict[str, Any]:
     scraper = ApifyAmazonScraperService(debug_mode=False)
     if not scraper.is_configured:
-        raise RuntimeError("实时数据源未配置，缺少：" + "、".join(scraper.missing_config))
+        raise RuntimeError(
+            "实时数据源未配置，缺少："
+            + "、".join(scraper.missing_config)
+            + "。"
+            + _apify_runtime_diagnostic()
+        )
 
     products = asyncio.run(scraper.search_top_products(keyword, locale, top_n))
     if not products:
