@@ -59,15 +59,17 @@ async def _run_job(job_id: UUID) -> None:
         job["progress"] = 10
         job["updated_at"] = _now_iso()
 
-        if not APIFY.is_configured:
-            raise RuntimeError("实时数据源未配置，缺少：" + "、".join(APIFY.missing_config))
-
-        products = await APIFY.search_top_products(job["keyword"], job["locale"], job["top_n"])
+        if not APIFY.is_configured_for(job["platform"]):
+            raise RuntimeError(
+                "实时数据源未配置，缺少："
+                + "、".join(APIFY.missing_config_for(job["platform"]))
+            )
+        products = await APIFY.search_top_products(job["keyword"], job["locale"], job["top_n"], platform=job["platform"])
         if not products:
             raise RuntimeError("实时数据源没有返回商品结果。")
         job["progress"] = 90
         job["updated_at"] = _now_iso()
-        job["report"] = APIFY.build_report(job["keyword"], job["locale"], job["top_n"], products)
+        job["report"] = APIFY.build_report(job["keyword"], job["locale"], job["top_n"], products, platform=job["platform"])
         job["status"] = "completed"
         job["progress"] = 100
         job["updated_at"] = _now_iso()

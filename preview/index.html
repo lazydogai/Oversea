@@ -29,8 +29,9 @@
       .content { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr); border-bottom: 1px solid var(--line); }
       .panel { padding: 28px 36px; border-right: 1px solid var(--line); }
       .panel:last-child { border-right: 0; }
-      .search { display: grid; grid-template-columns: minmax(0, 1fr) 150px; border: 1px solid var(--line); }
+      .search { display: grid; grid-template-columns: minmax(0, 1fr) 132px 150px; border: 1px solid var(--line); }
       input { border: 0; border-right: 1px solid var(--line); padding: 16px; font: inherit; font-size: 16px; }
+      .search select { border: 0; border-right: 1px solid var(--line); padding: 16px; font: inherit; font-size: 16px; background: var(--surface); }
       .search button { height: auto; border: 0; background: var(--accent); color: var(--surface); }
       .status { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
       .chip { border: 1px solid var(--line); padding: 8px 12px; font-size: 13px; }
@@ -163,7 +164,7 @@
         <header>
           <div>
             <p class="eyebrow">竞品搜索分析平台 V1</p>
-            <h1>Amazon 搜索分析报告</h1>
+            <h1>Amazon / Taobao 搜索分析报告</h1>
           </div>
           <div class="actions">
             <button id="reportsBtn" type="button">报告</button>
@@ -174,6 +175,10 @@
           <div class="panel">
             <form class="search" id="searchForm">
               <input id="keywordInput" value="" placeholder="例如：wireless mouse" aria-label="Amazon keyword" />
+              <select id="platformSelect" aria-label="平台">
+                <option value="amazon">Amazon</option>
+                <option value="taobao">Taobao</option>
+              </select>
               <button id="analyzeBtn" type="submit">开始分析</button>
             </form>
             <p class="notice" id="apiNotice">数据状态：<strong>就绪</strong></p>
@@ -194,7 +199,7 @@
           <div class="panel">
             <div class="flow">
               <div class="step"><div class="num">01</div><div><h2>创建报告任务</h2><p>系统会创建报告任务，并在完成后返回市场分析结果。</p></div></div>
-              <div class="step"><div class="num">02</div><div><h2>采集 Amazon Top 50</h2><p>系统读取公开搜索结果，并统一整理为可分析的商品数据。</p></div></div>
+              <div class="step"><div class="num">02</div><div><h2>采集 Amazon / Taobao Top 50</h2><p>系统读取公开搜索结果，并统一整理为可分析的商品数据。</p></div></div>
               <div class="step"><div class="num">03</div><div><h2>生成 Listing 建议</h2><p>把 VOC、痛点与产品规格转成可执行的 Listing 优化方向。</p></div></div>
               <div class="step"><div class="num">04</div><div><h2>字段完整度校验</h2><p>检查标题、卖点、关键词、图片与价格等核心字段是否完整。</p></div></div>
             </div>
@@ -340,6 +345,7 @@
       const SAMPLE_URL = "./crawl-sample.json";
       const TOP_N = Math.min(Number.parseInt(PREVIEW_PARAMS.get("top_n") || "50", 10), 50);
       const INITIAL_KEYWORD = (PREVIEW_PARAMS.get("q") || PREVIEW_PARAMS.get("keyword") || "").trim();
+      const INITIAL_PLATFORM = PREVIEW_PARAMS.get("platform") || "amazon";
       const AUTORUN = PREVIEW_PARAMS.get("autorun") === "1";
       const els = {
         amazonChoiceFilter: document.getElementById("amazonChoiceFilter"),
@@ -352,6 +358,7 @@
         filteredCount: document.getElementById("filteredCount"),
         focusValue: document.getElementById("focusValue"),
         keywordInput: document.getElementById("keywordInput"),
+        platformSelect: document.getElementById("platformSelect"),
         jobMeta: document.getElementById("jobMeta"),
         jobProgressValue: document.getElementById("jobProgressValue"),
         jobState: document.getElementById("jobState"),
@@ -383,8 +390,13 @@
 
       let pollTimer = null;
       let currentReport = null;
+      let currentCurrencySymbol = "$";
+      const platformLabel = (value) => (value === "taobao" ? "Taobao" : "Amazon");
 
       els.keywordInput.value = INITIAL_KEYWORD;
+      if (els.platformSelect) {
+        els.platformSelect.value = INITIAL_PLATFORM;
+      }
 
       const toNumber = (value) => {
         if (value === null || value === undefined || String(value).trim() === "") {
@@ -394,19 +406,19 @@
         return Number.isFinite(n) ? n : null;
       };
 
-      const currency = (value) => {
+      const currency = (value, symbol = currentCurrencySymbol) => {
         if (value === null || value === undefined || Number.isNaN(Number(value))) {
           return "—";
         }
-        return `$${Number(value).toFixed(2)}`;
+        return `${symbol}${Number(value).toFixed(2)}`;
       };
 
-      const buildPriceDistribution = (prices) => {
+      const buildPriceDistribution = (prices, symbol = "$") => {
         const buckets = [
-          ["$0-$15", 0, 15],
-          ["$15-$20", 15, 20],
+          [`${symbol}0-${symbol}15`, 0, 15],
+          [`${symbol}15-${symbol}20`, 15, 20],
           ["$20-$30", 20, 30],
-          ["$30-$40", 30, 40],
+          [`${symbol}30-${symbol}40`, 30, 40],
           ["$40-$60", 40, 60],
           ["$60-$100", 60, 100],
           ["$100-$500", 100, 500],
@@ -421,7 +433,7 @@
         });
       };
 
-      const buildSampleReport = (rows, keyword = "desk lamp") => {
+      const buildSampleReport = (rows, keyword = "desk lamp", platform = "amazon") => {
         const prices = rows.map((row) => toNumber(row.price)).filter((value) => value !== null);
         const reviews = rows.map((row) => toNumber(row.reviewsCount)).filter((value) => value !== null);
         const stars = rows.map((row) => toNumber(row.stars)).filter((value) => value !== null);
@@ -454,9 +466,10 @@
         return {
           summary: {
             keyword,
-            platform: "amazon",
+            platform,
             locale: "US",
             top_n: rows.length,
+            currency_symbol: platform === "taobao" ? "¥" : "$",
           },
           metrics: {
             product_count: rows.length,
@@ -467,7 +480,7 @@
             review_total: reviews.reduce((sum, value) => sum + value, 0),
             top_brand_share: topBrandEntry ? Math.round((topBrandEntry[1] / rows.length) * 100) / 100 : null,
           },
-          price_distribution: buildPriceDistribution(prices),
+          price_distribution: buildPriceDistribution(prices, platform === "taobao" ? "¥" : "$"),
           top_competitors: rows.map((row, index) => ({
             rank: index + 1,
             asin: row.asin,
@@ -721,11 +734,11 @@
         els.filteredCount.textContent = `${filtered.length} / ${items.length} 行`;
         els.tableCount.textContent = `显示 ${Math.min(filtered.length, 60)} / ${filtered.length} 行`;
         renderMarketKpis(filtered, items.length);
-        renderBreakdown(els.priceBreakdown, buildPriceDistribution(valuesFor(filtered, "price")));
+        renderBreakdown(els.priceBreakdown, buildPriceDistribution(valuesFor(filtered, "price"), currentCurrencySymbol));
         renderBreakdown(els.ratingBreakdown, buildRatingDistribution(valuesFor(filtered, "rating")));
         renderBreakdown(els.brandBreakdown, topBrands(filtered), "label");
         renderOpportunities(filtered);
-        renderPriceChart(buildPriceDistribution(valuesFor(filtered, "price")));
+        renderPriceChart(buildPriceDistribution(valuesFor(filtered, "price"), currentCurrencySymbol));
         renderCompetitors(filtered.slice(0, 20));
         renderRawTable(filtered);
       };
@@ -778,7 +791,7 @@
 
         els.topCompetitors.innerHTML = items
           .map((item) => {
-            const amazonUrl = item.product_url || (item.asin ? `https://www.amazon.com/dp/${item.asin}` : null);
+            const productUrl = item.product_url || (item.item_id ? (currentReport?.summary?.platform === "taobao" ? `https://item.taobao.com/item.htm?id=${item.item_id}` : `https://www.amazon.com/dp/${item.item_id}`) : null);
             const placeholder = item.asin
               ? `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
                 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
@@ -807,8 +820,8 @@
                   <p class="title">${item.title}</p>
                   <p class="meta">${details || "竞品记录"}</p>
                   ${
-                    amazonUrl
-                       ? `<div class="actions"><a class="product-link" href="${amazonUrl}" target="_blank" rel="noreferrer">打开 Amazon 商品</a></div>`
+                    productUrl
+                       ? `<div class="actions"><a class="product-link" href="${productUrl}" target="_blank" rel="noreferrer">打开 ${platformLabel(currentReport?.summary?.platform)} 商品</a></div>`
                       : ""
                   }
                 </div>
@@ -831,7 +844,7 @@
         const rows = items
           .slice(0, 60)
           .map((item) => {
-            const amazonUrl = item.product_url || (item.asin ? `https://www.amazon.com/dp/${item.asin}` : "#");
+            const productUrl = item.product_url || (item.item_id ? (currentReport?.summary?.platform === "taobao" ? `https://item.taobao.com/item.htm?id=${item.item_id}` : `https://www.amazon.com/dp/${item.item_id}`) : "#");
             const placeholder = item.asin
               ? `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
                 <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
@@ -856,7 +869,7 @@
                 <td>${item.bsr ?? "—"}</td>
                 <td>${item.is_amazon_choice ? "是" : "—"}</td>
                 <td>${item.monthly_purchase_volume || "—"}</td>
-                <td>${amazonUrl !== "#" ? `<a class="muted-link" href="${amazonUrl}" target="_blank" rel="noreferrer">打开</a>` : "—"}</td>
+                <td>${productUrl !== "#" ? `<a class="muted-link" href="${productUrl}" target="_blank" rel="noreferrer">打开</a>` : "—"}</td>
               </tr>
             `;
           })
@@ -887,10 +900,10 @@
         if (!report) {
           els.searchScopeValue.textContent = `Top ${job.top_n}`;
           els.deepDiveValue.textContent = "Top 20";
-          els.focusValue.textContent = job.platform;
+          els.focusValue.textContent = platformLabel(job.platform);
           els.jobTitle.textContent = `${job.keyword} / ${job.status}`;
           els.jobSummary.textContent = "报告任务已创建，正在等待结果。";
-          els.jobMeta.textContent = `${job.platform} · ${job.locale} · ${job.top_n}`;
+          els.jobMeta.textContent = `${platformLabel(job.platform)} · ${job.locale} · ${job.top_n}`;
           els.jobProgressValue.textContent = `${job.progress}%`;
           els.recommendationBox.textContent = "等待报告。";
           renderPriceChart([]);
@@ -905,11 +918,12 @@
 
         els.searchScopeValue.textContent = `Top ${report.summary.top_n}`;
         els.deepDiveValue.textContent = "Top 20";
-        els.focusValue.textContent = report.summary.platform;
+        els.focusValue.textContent = platformLabel(report.summary.platform);
         els.jobTitle.textContent = `${report.summary.keyword} / ${job.status}`;
         els.jobSummary.textContent = `Created at ${new Date(job.created_at).toLocaleString()} · Updated at ${new Date(job.updated_at).toLocaleString()}`;
-        els.jobMeta.textContent = `${job.platform} · ${job.locale} · ${job.top_n}`;
+        els.jobMeta.textContent = `${platformLabel(job.platform)} · ${job.locale} · ${job.top_n}`;
         els.jobProgressValue.textContent = `${job.progress}%`;
+        currentCurrencySymbol = report.summary.currency_symbol || (report.summary.platform === "taobao" ? "¥" : "$");
         const sourceLabel = report.source === "live_data" || report.source === "apify"
           ? "实时数据源"
           : report.source === "cached_snapshot" || report.source === "cached_apify_snapshot"
@@ -956,7 +970,7 @@
             throw new Error(`Sample load failed (${response.status})`);
           }
           const rows = await response.json();
-          const report = buildSampleReport(rows, keyword);
+          const report = buildSampleReport(rows, keyword, els.platformSelect?.value || "amazon");
           renderFromReport({
             job_id: "sample-crawl",
             status: "completed",
@@ -1028,7 +1042,7 @@
             },
             body: JSON.stringify({
               keyword,
-              platform: "amazon",
+              platform: els.platformSelect?.value || "amazon",
               locale: "US",
               top_n: Number.isFinite(TOP_N) ? TOP_N : 50,
             }),
@@ -1076,6 +1090,9 @@
       els.newSearchBtn.addEventListener("click", () => {
         stopPolling();
         els.keywordInput.value = INITIAL_KEYWORD;
+        if (els.platformSelect) {
+          els.platformSelect.value = INITIAL_PLATFORM;
+        }
         els.keywordInput.focus();
         setNotice("就绪");
         setActiveStatus("queued");

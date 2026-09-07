@@ -84,18 +84,17 @@ def _price_distribution(prices: list[float]) -> list[dict[str, Any]]:
 
 def _completed_job(keyword: str, platform: str, locale: str, top_n: int) -> dict[str, Any]:
     scraper = ApifyAmazonScraperService(debug_mode=False)
-    if not scraper.is_configured:
+    if not scraper.is_configured_for(platform):
         raise RuntimeError(
             "实时数据源未配置，缺少："
-            + "、".join(scraper.missing_config)
+            + "、".join(scraper.missing_config_for(platform))
             + "。"
             + _apify_runtime_diagnostic()
         )
-
-    products = asyncio.run(scraper.search_top_products(keyword, locale, top_n))
+    products = asyncio.run(scraper.search_top_products(keyword, locale, top_n, platform=platform))
     if not products:
         raise RuntimeError("实时数据源没有返回商品结果。")
-    report = scraper.build_report(keyword, locale, top_n, products)
+    report = scraper.build_report(keyword, locale, top_n, products, platform=platform)
     now = _now_iso()
     return {
         "job_id": str(uuid4()),
@@ -123,7 +122,10 @@ class handler(BaseHTTPRequestHandler):
                 _json_response(self, 400, {"error": "keyword is required"})
                 return
 
-            platform = str(payload.get("platform") or "amazon")
+            platform = str(payload.get("platform") or "amazon").strip().lower()
+            if platform not in {"amazon", "taobao"}:
+                _json_response(self, 400, {"error": "platform must be amazon or taobao"})
+                return
             locale = str(payload.get("locale") or "US")
             top_n = min(max(int(payload.get("top_n") or 50), 1), MAX_TOP_N)
             _json_response(self, 200, _completed_job(keyword, platform, locale, top_n))

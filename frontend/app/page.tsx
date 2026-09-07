@@ -21,6 +21,8 @@ type JobResponse = {
       platform: string;
       locale: string;
       top_n: number;
+      currency_code?: string;
+      currency_symbol?: string;
     };
     metrics: {
       product_count: number;
@@ -69,7 +71,7 @@ const statusLabel = (status?: JobResponse["status"] | "idle") => {
 
 const tiles = [
   {
-    title: "Amazon 搜索分析",
+    title: "Amazon / Taobao 搜索分析",
     icon: Search,
     desc: "输入关键词，生成 Top 50 竞品报告。",
   },
@@ -87,6 +89,7 @@ const tiles = [
 
 export default function HomePage() {
   const [keyword, setKeyword] = useState("desk lamp");
+  const [platform, setPlatform] = useState("amazon");
   const [job, setJob] = useState<JobResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const pollTimer = useRef<number | null>(null);
@@ -100,6 +103,7 @@ export default function HomePage() {
   }, []);
 
   const priceBars = useMemo(() => job?.report?.price_distribution ?? [], [job]);
+  const currencySymbol = job?.report?.summary.currency_symbol ?? (platform === "taobao" ? "¥" : "$");
 
   const stopPolling = () => {
     if (pollTimer.current) {
@@ -150,7 +154,7 @@ export default function HomePage() {
         },
         body: JSON.stringify({
           keyword,
-          platform: "amazon",
+          platform,
           locale: "US",
           top_n: 50,
         }),
@@ -173,7 +177,7 @@ export default function HomePage() {
         <header className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-slate-500">Oversea</p>
-            <h1 className="text-2xl font-semibold">Amazon 搜索分析</h1>
+            <h1 className="text-2xl font-semibold">{platform === "taobao" ? "Taobao 搜索分析" : "Amazon 搜索分析"}</h1>
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -191,14 +195,25 @@ export default function HomePage() {
           </div>
         </header>
 
-        <section className="grid gap-4 border border-slate-200 bg-white p-5 md:grid-cols-[1fr_160px]">
+        <section className="grid gap-4 border border-slate-200 bg-white p-5 md:grid-cols-[1fr_160px_160px]">
           <label className="grid gap-2">
-            <span className="text-xs uppercase tracking-wide text-slate-500">Amazon 关键词</span>
+            <span className="text-xs uppercase tracking-wide text-slate-500">关键词</span>
             <input
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
               className="h-12 border border-slate-200 px-3 text-base outline-none"
             />
+          </label>
+          <label className="grid gap-2">
+            <span className="text-xs uppercase tracking-wide text-slate-500">平台</span>
+            <select
+              value={platform}
+              onChange={(event) => setPlatform(event.target.value)}
+              className="h-12 border border-slate-200 px-3 text-base outline-none"
+            >
+              <option value="amazon">Amazon</option>
+              <option value="taobao">Taobao</option>
+            </select>
           </label>
           <button
             type="button"
@@ -210,7 +225,6 @@ export default function HomePage() {
             {loading ? "分析中" : "开始分析"}
           </button>
         </section>
-
         <div className="grid gap-4 md:grid-cols-3">
           {tiles.map((tile) => (
             <article key={tile.title} className="rounded-lg border border-slate-200 bg-white p-5">
@@ -246,7 +260,7 @@ export default function HomePage() {
             <div className="mt-5 grid gap-3 md:grid-cols-4">
               {[
                 { label: "Top N", value: job?.top_n ?? 50 },
-                { label: "平台", value: job?.platform ?? "amazon" },
+                { label: "平台", value: job ? (job.platform === "taobao" ? "Taobao" : "Amazon") : (platform === "taobao" ? "Taobao" : "Amazon") },
                 { label: "地区", value: job?.locale ?? "US" },
                 { label: "状态", value: statusLabel(job?.status ?? "idle") },
               ].map((item) => (
@@ -264,7 +278,7 @@ export default function HomePage() {
               {job?.report ? job.report.recommendation.positioning : "等待报告"}
             </h2>
             <p className="mt-2 text-sm text-slate-600">
-              建议价格：{job?.report ? `$${job.report.recommendation.suggested_price}` : "—"}
+              建议价格：{job?.report ? `${currencySymbol}${job.report.recommendation.suggested_price}` : "—"}
             </p>
             <div className="mt-4 grid gap-2">
               {(job?.report?.recommendation.listing_focus ?? []).map((item) => (

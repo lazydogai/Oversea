@@ -12,6 +12,8 @@ from apify_client import ApifyClient
 
 from app.core.config import get_settings
 
+SUPPORTED_PLATFORMS = {"amazon", "taobao"}
+TAOBAO_DEFAULT_ACTOR_ID = "zen-studio/taobao-search-scraper"
 
 def _parse_price(value: Any) -> float | None:
     if value is None:
@@ -43,6 +45,17 @@ def _parse_int(value: Any) -> int | None:
         if match:
             return int(match.group(1))
     return None
+
+
+def _normalize_platform(platform: str) -> str:
+    normalized = (platform or "amazon").strip().lower()
+    if normalized in {"taobao", "tmall", "tao"}:
+        return "taobao"
+    return "amazon"
+
+
+def _currency_for_platform(platform: str) -> tuple[str, str]:
+    return ("CNY", "¥") if _normalize_platform(platform) == "taobao" else ("USD", "$")
 
 
 def _proxy_country_for_locale(locale: str) -> str:
@@ -89,49 +102,112 @@ def _parse_bsr(item: dict[str, Any], fallback: int) -> int:
 
 
 def _normalize_item(item: dict[str, Any], rank: int, marketplace: str) -> dict[str, Any]:
+    normalized_marketplace = _normalize_platform(marketplace)
+    search = item.get("search") if isinstance(item.get("search"), dict) else {}
+    shop = item.get("shop") if isinstance(item.get("shop"), dict) else {}
     asin = (
         item.get("asin")
         or item.get("productAsin")
-        or item.get("id")
         or item.get("sku")
-        or item.get("productId")
+        or (item.get("productId") if normalized_marketplace == "amazon" else "")
         or ""
     )
-    title = item.get("title") or item.get("name") or item.get("productTitle") or f"Product {rank}"
-    product_url = (
-        item.get("url")
-        or item.get("productUrl")
-        or item.get("product_url")
-        or (f"https://www.amazon.com/dp/{asin}" if asin else "")
+    item_id = item.get("itemId") or search.get("itemId") or item.get("productId") or item.get("id") or item.get("sku") or ""
+    title = (
+        item.get("title")
+        or item.get("titleOriginal")
+        or item.get("name")
+        or item.get("productTitle")
+        or search.get("itemName")
+        or f"Product {rank}"
     )
+    if normalized_marketplace == "taobao":
+        product_url = (
+            item.get("url")
+            or item.get("productUrl")
+            or item.get("product_url")
+            or item.get("itemUrl")
+            or item.get("detailUrl")
+            or (f"https://item.taobao.com/item.htm?id={item_id}" if item_id else "")
+        )
+    else:
+        product_url = (
+            item.get("url")
+            or item.get("productUrl")
+            or item.get("product_url")
+            or (f"https://www.amazon.com/dp/{asin}" if asin else "")
+        )
+    shop_name = str(
+        item.get("shopName")
+        or item.get("sellerName")
+        or item.get("storeName")
+        or item.get("shop_name")
+        or item.get("seller")
+        or shop.get("shopName")
+        or shop.get("shopNameFromSearch")
+        or shop.get("sellerNick")
+        or ""
+    )
+    shop_url = str(item.get("shopUrl") or item.get("sellerUrl") or item.get("shop_url") or shop.get("shopUrl") or "")
     price = _parse_price(
         item.get("price")
         or item.get("currentPrice")
         or item.get("buyBoxPrice")
         or item.get("listingPrice")
+        or item.get("discountedPriceFromSearch")
+        or item.get("priceFromSearch")
+        or item.get("originalPrice")
+        or search.get("discntPriceYuan")
+        or search.get("priceYuan")
     )
-    brand = item.get("brand") or item.get("manufacturer") or ""
-    rating = _parse_price(item.get("stars") or item.get("rating") or item.get("averageRating"))
+    brand = item.get("brand") or item.get("brandName") or item.get("manufacturer") or shop_name or ""
+    rating = _parse_price(
+        item.get("stars")
+        or item.get("rating")
+        or item.get("averageRating")
+        or item.get("shopRating")
+        or item.get("itemGradeAvg")
+        or search.get("itemGradeAvg")
+    )
     review_count = _parse_int(
         item.get("reviewsCount")
         or item.get("reviewCount")
         or item.get("ratingCount")
         or item.get("reviews_count")
+        or item.get("commentCount")
+        or item.get("commentsCount")
+        or search.get("commentCount")
     ) or 0
     bsr = _parse_bsr(item, rank)
+    pictures = item.get("pictures") if isinstance(item.get("pictures"), list) else []
     image_url = (
         item.get("imageUrl")
         or item.get("image_url")
         or item.get("mainImage")
         or item.get("thumbnailImage")
+        or item.get("mainPictureUrl")
+        or item.get("picUrlFull")
+        or search.get("picUrlFull")
+        or (pictures[0] if pictures else "")
         or ""
+    )
+    monthly_purchase_volume = (
+        item.get("monthlyPurchaseVolume")
+        or item.get("salesSignal")
+        or item.get("sales")
+        or item.get("totalSold")
+        or item.get("monthlySales")
+        or search.get("orderPayUV")
     )
 
     return {
         "asin": str(asin),
+        "item_id": str(item_id),
         "title": str(title),
         "product_url": str(product_url),
         "brand": str(brand),
+        "shop_name": shop_name,
+        "shop_url": shop_url,
         "rating": rating,
         "price": price,
         "bsr": bsr,
@@ -139,22 +215,21 @@ def _normalize_item(item: dict[str, Any], rank: int, marketplace: str) -> dict[s
         "image_url": str(image_url),
         "is_amazon_choice": bool(item.get("isAmazonChoice") or item.get("amazonChoiceText")),
         "amazon_choice_text": item.get("amazonChoiceText"),
-        "monthly_purchase_volume": item.get("monthlyPurchaseVolume"),
-        "marketplace": marketplace,
+        "monthly_purchase_volume": monthly_purchase_volume,
+        "marketplace": normalized_marketplace,
         "raw": item,
     }
 
-
-def _build_price_distribution(prices: list[float]) -> list[dict[str, Any]]:
+def _build_price_distribution(prices: list[float], currency_symbol: str = "$") -> list[dict[str, Any]]:
     buckets = [
-        ("$0-$15", 0, 15),
-        ("$15-$20", 15, 20),
-        ("$20-$25", 20, 25),
-        ("$25-$30", 25, 30),
-        ("$30-$40", 30, 40),
-        ("$40-$50", 40, 50),
-        ("$50-$70", 50, 70),
-        ("$70+", 70, None),
+        (f"{currency_symbol}0-{currency_symbol}15", 0, 15),
+        (f"{currency_symbol}15-{currency_symbol}20", 15, 20),
+        (f"{currency_symbol}20-{currency_symbol}25", 20, 25),
+        (f"{currency_symbol}25-{currency_symbol}30", 25, 30),
+        (f"{currency_symbol}30-{currency_symbol}40", 30, 40),
+        (f"{currency_symbol}40-{currency_symbol}50", 40, 50),
+        (f"{currency_symbol}50-{currency_symbol}70", 50, 70),
+        (f"{currency_symbol}70+", 70, None),
     ]
 
     distribution: list[dict[str, Any]] = []
@@ -178,24 +253,51 @@ class ApifyAmazonScraperService:
         settings = get_settings()
         self.api_token = api_token if api_token is not None else settings.apify_api_token
         self.actor_id = actor_id if actor_id is not None else settings.apify_amazon_scraper_actor_id
+        self.taobao_actor_id = settings.apify_taobao_search_actor_id or TAOBAO_DEFAULT_ACTOR_ID
         self.debug_mode = settings.debug_mode if debug_mode is None else debug_mode
         self.timeout_seconds = timeout_seconds if timeout_seconds is not None else settings.apify_timeout_seconds
 
-    @property
-    def missing_config(self) -> list[str]:
+    def actor_id_for_platform(self, platform: str) -> str | None:
+        normalized = _normalize_platform(platform)
+        if normalized == "taobao":
+            return self.taobao_actor_id
+        return self.actor_id
+
+    def missing_config_for(self, platform: str) -> list[str]:
         missing: list[str] = []
         if not self.api_token:
             missing.append("APIFY_API_TOKEN 或 APIFY_TOKEN")
-        if not self.actor_id:
-            missing.append("APIFY_AMAZON_SCRAPER_ACTOR_ID 或 APIFY_AMAZON_SEARCH_ACTOR")
+        normalized = _normalize_platform(platform)
+        actor_id = self.actor_id_for_platform(normalized)
+        if not actor_id:
+            if normalized == "taobao":
+                missing.append("APIFY_TAOBAO_SEARCH_ACTOR")
+            else:
+                missing.append("APIFY_AMAZON_SCRAPER_ACTOR_ID 或 APIFY_AMAZON_SEARCH_ACTOR")
         return missing
 
     @property
-    def is_configured(self) -> bool:
-        return not self.missing_config
+    def missing_config(self) -> list[str]:
+        return self.missing_config_for("amazon")
 
-    def _build_run_input(self, keyword: str, locale: str, limit: int) -> dict[str, Any]:
+    def is_configured_for(self, platform: str) -> bool:
+        return not self.missing_config_for(platform)
+
+    @property
+    def is_configured(self) -> bool:
+        return self.is_configured_for("amazon")
+
+    def _build_run_input(self, keyword: str, locale: str, limit: int, platform: str) -> dict[str, Any]:
+        normalized_platform = _normalize_platform(platform)
         run_limit = 10 if self.debug_mode else min(limit, 50)
+        if normalized_platform == "taobao":
+            run_limit = max(10, run_limit)
+            return {
+                "keyword": keyword,
+                "maxItems": run_limit,
+                "enrichWithDetails": False,
+                "fetchReviews": False,
+            }
         max_search_pages = max(1, min(5, math.ceil(run_limit / 48)))
         search_url = f"https://www.amazon.com/s?k={quote_plus(keyword)}"
         return {
@@ -206,12 +308,16 @@ class ApifyAmazonScraperService:
             "proxyCountry": _proxy_country_for_locale(locale),
         }
 
-    async def search_top_products(self, keyword: str, locale: str = "US", limit: int = 200) -> list[dict[str, Any]]:
-        if not self.is_configured:
+    async def search_top_products(self, keyword: str, locale: str = "US", limit: int = 200, platform: str = "amazon") -> list[dict[str, Any]]:
+        normalized_platform = _normalize_platform(platform)
+        if not self.is_configured_for(normalized_platform):
             raise RuntimeError("Live data source is not configured")
 
         limit = min(limit, 50)
-        run_input = self._build_run_input(keyword=keyword, locale=locale, limit=limit)
+        run_input = self._build_run_input(keyword=keyword, locale=locale, limit=limit, platform=normalized_platform)
+        actor_id = self.actor_id_for_platform(normalized_platform)
+        if not actor_id:
+            raise RuntimeError("Live data source actor is not configured")
 
         def _run() -> list[dict[str, Any]]:
             # Keep optional constructor arguments compatible with the deployed SDK version.
@@ -222,7 +328,7 @@ class ApifyAmazonScraperService:
             if "timeout_secs" in supported_kwargs:
                 client_kwargs["timeout_secs"] = self.timeout_seconds
             client = ApifyClient(self.api_token, **client_kwargs)
-            run = client.actor(self.actor_id).call(run_input=run_input)
+            run = client.actor(actor_id).call(run_input=run_input)
             dataset_id = run.get("defaultDatasetId") if isinstance(run, dict) else getattr(run, "default_dataset_id", None)
             if not dataset_id:
                 return []
@@ -233,11 +339,13 @@ class ApifyAmazonScraperService:
             asyncio.to_thread(_run),
             timeout=self.timeout_seconds + 15,
         )
-        normalized = [_normalize_item(item, index + 1, "amazon") for index, item in enumerate(raw_items)]
+        normalized = [_normalize_item(item, index + 1, normalized_platform) for index, item in enumerate(raw_items)]
         return normalized[: (10 if self.debug_mode else limit)]
 
     @staticmethod
-    def build_report(keyword: str, locale: str, top_n: int, products: list[dict[str, Any]]) -> dict[str, Any]:
+    def build_report(keyword: str, locale: str, top_n: int, products: list[dict[str, Any]], platform: str = "amazon") -> dict[str, Any]:
+        normalized_platform = _normalize_platform(platform)
+        currency_code, currency_symbol = _currency_for_platform(normalized_platform)
         prices = [item["price"] for item in products if isinstance(item.get("price"), (int, float))]
         review_total = sum(int(item.get("review_count") or 0) for item in products)
         ratings = [item["rating"] for item in products if isinstance(item.get("rating"), (int, float))]
@@ -250,6 +358,8 @@ class ApifyAmazonScraperService:
                 "title": item["title"],
                 "product_url": item.get("product_url"),
                 "brand": item.get("brand"),
+                "shop_name": item.get("shop_name"),
+                "shop_url": item.get("shop_url"),
                 "rating": item.get("rating"),
                 "price": item["price"],
                 "bsr": item["bsr"],
@@ -265,16 +375,20 @@ class ApifyAmazonScraperService:
         title_tokens = Counter(
             token.lower()
             for item in products[:20]
-            for token in re.findall(r"[A-Za-z0-9]+", item["title"])
-            if len(token) > 2
+            for token in re.findall(r"[A-Za-z0-9\u4e00-\u9fff]+", item["title"])
+            if len(token) > 1
         )
+
+        platform_label = "淘宝" if normalized_platform == "taobao" else "Amazon"
 
         return {
             "summary": {
                 "keyword": keyword,
-                "platform": "amazon",
+                "platform": normalized_platform,
                 "locale": locale,
                 "top_n": top_n,
+                "currency_code": currency_code,
+                "currency_symbol": currency_symbol,
             },
             "metrics": {
                 "product_count": len(products),
@@ -284,8 +398,9 @@ class ApifyAmazonScraperService:
                 "avg_rating": round(sum(ratings) / len(ratings), 2) if ratings else None,
                 "review_total": review_total,
                 "top_brand_share": round(top_brand[0][1] / len(products), 2) if top_brand else None,
+                "currency_symbol": currency_symbol,
             },
-            "price_distribution": _build_price_distribution(prices),
+            "price_distribution": _build_price_distribution(prices, currency_symbol),
             "top_competitors": top_competitors,
             "voc": {
                 "pain_points": [
@@ -301,7 +416,7 @@ class ApifyAmazonScraperService:
             },
             "recommendation": {
                 "suggested_price": round(sorted(prices)[len(prices) // 2], 2) if prices else None,
-                "positioning": "基于 Amazon 搜索结果的市场定位",
+                "positioning": f"基于 {platform_label} 搜索结果的市场定位",
                 "listing_focus": [token for token, _ in title_tokens.most_common(5)],
             },
             "source": "live_data",

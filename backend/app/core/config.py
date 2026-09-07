@@ -20,9 +20,11 @@ class Settings(BaseSettings):
     apify_snapshot_keyword: str = "desk lamp"
     apify_api_token: str | None = None
     apify_amazon_scraper_actor_id: str | None = None
+    apify_taobao_search_actor_id: str | None = None
     apify_token: str | None = None
     apify_api_key: str | None = None
     apify_amazon_search_actor: str | None = None
+    apify_taobao_search_actor: str | None = None
     apify_actor_id: str | None = None
     apify_amazon_actor_id: str | None = None
     apify_amazon_crawler_actor_id: str | None = None
@@ -43,6 +45,8 @@ class Settings(BaseSettings):
                 or self.apify_amazon_actor_id
                 or self.apify_amazon_crawler_actor_id
             )
+        if not self.apify_taobao_search_actor_id:
+            self.apify_taobao_search_actor_id = self.apify_taobao_search_actor or "zen-studio/taobao-search-scraper"
 
 
 @lru_cache(maxsize=1)
