@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Added **Download PDF** on the full market brief panel (html2pdf.js, with print fallback).
 
 - Formal SERP market brief as `report.report_markdown` (LLM or deterministic fallback) matching analyst REPORT.md sections; preview opens an inline **Full Report** panel with Markdown→HTML rendering plus **Download .md / .html**.
 - Wired OpenRouter LLM adapter (`OpenRouterLLMAdapter`) for bilingual VOC, listing recommendations, and market-brief narrative (`report_lang` zh|en); MockLLMAdapter remains the no-key fallback.

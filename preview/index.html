@@ -372,11 +372,12 @@
             <div class="report-heading">
               <div>
                 <h2 class="section-title" style="margin-bottom:6px;" data-i18n="sec_full_report">完整报告</h2>
-                <p class="notice" style="margin:0;" data-i18n="full_report_hint">分析完成后会在此打开完整市调简报，可下载 Markdown 或可打印 HTML。</p>
+                <p class="notice" style="margin:0;" data-i18n="full_report_hint">分析完成后会在此打开完整市调简报，可下载 Markdown、HTML 或 PDF。</p>
               </div>
               <div class="full-report-toolbar">
                 <button type="button" id="downloadMdBtn" data-i18n="btn_download_md">下载 .md</button>
-                <button type="button" id="downloadHtmlBtn" class="primary" data-i18n="btn_download_html">下载 .html</button>
+                <button type="button" id="downloadHtmlBtn" data-i18n="btn_download_html">下载 .html</button>
+                <button type="button" id="downloadPdfBtn" class="primary" data-i18n="btn_download_pdf">下载 PDF</button>
               </div>
             </div>
             <div class="md-body empty-state" id="fullReportBody" data-i18n="wait_report">等待报告。</div>
@@ -484,9 +485,12 @@
           "label_visual": "视觉风格",
           "label_reco": "建议",
           "sec_full_report": "完整报告",
-          "full_report_hint": "分析完成后会在此打开完整市调简报，可下载 Markdown 或可打印 HTML。",
+          "full_report_hint": "分析完成后会在此打开完整市调简报，可下载 Markdown、HTML 或 PDF。",
           "btn_download_md": "下载 .md",
           "btn_download_html": "下载 .html",
+          "btn_download_pdf": "下载 PDF",
+          "pdf_preparing": "正在生成 PDF…",
+          "pdf_fail": "PDF 生成失败，已打开打印窗口，请选择「存储为 PDF」。",
           "sec_narrative": "市场简报",
           "lang_rerun_notice": "报告正文语言由分析时决定。切换界面语言后请重新点击「开始分析」以生成对应语言的 LLM 洞察。",
           "label_listing_focus": "Listing 重点",
@@ -662,9 +666,12 @@
           "label_visual": "Visual style",
           "label_reco": "Recommendations",
           "sec_full_report": "Full Report",
-          "full_report_hint": "After analysis, the full SERP market brief opens here. Download Markdown or printable HTML.",
+          "full_report_hint": "After analysis, the full SERP market brief opens here. Download Markdown, HTML, or PDF.",
           "btn_download_md": "Download .md",
           "btn_download_html": "Download .html",
+          "btn_download_pdf": "Download PDF",
+          "pdf_preparing": "Generating PDF…",
+          "pdf_fail": "PDF failed; opened print dialog — choose Save as PDF.",
           "sec_narrative": "Market brief",
           "lang_rerun_notice": "Report body language is set when you run analysis. After switching UI language, click Analyze again to regenerate LLM insights in that language.",
           "label_listing_focus": "Listing focus",
@@ -878,6 +885,7 @@
         fullReportBody: document.getElementById("fullReportBody"),
         downloadMdBtn: document.getElementById("downloadMdBtn"),
         downloadHtmlBtn: document.getElementById("downloadHtmlBtn"),
+        downloadPdfBtn: document.getElementById("downloadPdfBtn"),
         reportsBtn: document.getElementById("reportsBtn"),
         ratingBreakdown: document.getElementById("ratingBreakdown"),
         ratingFilter: document.getElementById("ratingFilter"),
@@ -1921,7 +1929,39 @@
       });
 
 
-      const downloadCurrentReport = (kind) => {
+      const loadHtml2Pdf = () => new Promise((resolve, reject) => {
+        if (window.html2pdf) {
+          resolve(window.html2pdf);
+          return;
+        }
+        const existing = document.querySelector("script[data-html2pdf]");
+        if (existing) {
+          existing.addEventListener("load", () => resolve(window.html2pdf));
+          existing.addEventListener("error", () => reject(new Error("html2pdf load failed")));
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";
+        script.async = true;
+        script.dataset.html2pdf = "1";
+        script.onload = () => resolve(window.html2pdf);
+        script.onerror = () => reject(new Error("html2pdf load failed"));
+        document.head.appendChild(script);
+      });
+
+      const openPrintFallback = (title, bodyHtml, lang) => {
+        const html = buildStandaloneHtml(title, bodyHtml, lang);
+        const w = window.open("", "_blank");
+        if (!w) {
+          setNotice(t("pdf_fail"), "error");
+          return;
+        }
+        w.document.open();
+        w.document.write(html + "<script>window.onload=function(){setTimeout(function(){window.print();},250);}<\\/script>");
+        w.document.close();
+      };
+
+      const downloadCurrentReport = async (kind) => {
         const md = lastReportMarkdown || currentReport?.report_markdown || "";
         if (!String(md).trim()) {
           setNotice(t("wait_report"), "error");
@@ -1935,8 +1975,39 @@
           return;
         }
         const title = `${keyword} · market report`;
-        const html = buildStandaloneHtml(title, renderMarkdown(md), lang);
-        downloadBlob(`${base}.html`, html, "text/html;charset=utf-8");
+        const bodyHtml = renderMarkdown(md);
+        if (kind === "html") {
+          const html = buildStandaloneHtml(title, bodyHtml, lang);
+          downloadBlob(`${base}.html`, html, "text/html;charset=utf-8");
+          return;
+        }
+        if (kind === "pdf") {
+          setNotice(t("pdf_preparing"), "ready");
+          const host = document.createElement("div");
+          host.style.cssText = "position:fixed;left:-10000px;top:0;width:800px;padding:24px;background:#fff;color:#111;font-family:Helvetica Neue,Arial,sans-serif;font-size:14px;line-height:1.55;";
+          host.innerHTML = `<h1 style="font-size:22px;margin:0 0 12px;">${escapeHtml(title)}</h1>${bodyHtml}`;
+          document.body.appendChild(host);
+          try {
+            const html2pdf = await loadHtml2Pdf();
+            await html2pdf()
+              .set({
+                margin: [12, 12, 12, 12],
+                filename: `${base}.pdf`,
+                image: { type: "jpeg", quality: 0.95 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                pagebreak: { mode: ["css", "legacy"] },
+              })
+              .from(host)
+              .save();
+            setNotice(lang === "en" ? "PDF downloaded" : "PDF 已下载", "ready");
+          } catch (_err) {
+            openPrintFallback(title, bodyHtml, lang);
+            setNotice(t("pdf_fail"), "error");
+          } finally {
+            host.remove();
+          }
+        }
       };
 
       if (els.downloadMdBtn) {
@@ -1944,6 +2015,9 @@
       }
       if (els.downloadHtmlBtn) {
         els.downloadHtmlBtn.addEventListener("click", () => downloadCurrentReport("html"));
+      }
+      if (els.downloadPdfBtn) {
+        els.downloadPdfBtn.addEventListener("click", () => downloadCurrentReport("pdf"));
       }
 
       els.reportsBtn.addEventListener("click", () => {
