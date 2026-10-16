@@ -417,6 +417,19 @@ class ApifyAmazonScraperService:
         if suggested_price is None:
             suggested_price = median_price
 
+        report_markdown = enrichment.get("report_markdown") or ""
+        if not str(report_markdown).strip():
+            from app.services.llm_adapter import _build_deterministic_report_markdown
+
+            report_markdown = _build_deterministic_report_markdown(
+                keyword=keyword,
+                platform=normalized_platform,
+                products=products,
+                metrics=metrics,
+                report_lang=lang,
+                llm_source=source_tag,
+            )
+
         return {
             "summary": {
                 "keyword": keyword,
@@ -440,6 +453,7 @@ class ApifyAmazonScraperService:
                 "listing_focus": listing_focus[:5],
             },
             "narrative": enrichment.get("narrative") or "",
+            "report_markdown": report_markdown,
             "report_lang": lang,
             "llm_source": source_tag,
             "source": "live_data",
