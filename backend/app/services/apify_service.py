@@ -343,8 +343,18 @@ class ApifyAmazonScraperService:
         return normalized[: (10 if self.debug_mode else limit)]
 
     @staticmethod
-    def build_report(keyword: str, locale: str, top_n: int, products: list[dict[str, Any]], platform: str = "amazon") -> dict[str, Any]:
+    def build_report(
+        keyword: str,
+        locale: str,
+        top_n: int,
+        products: list[dict[str, Any]],
+        platform: str = "amazon",
+        report_lang: str = "zh",
+    ) -> dict[str, Any]:
+        from app.services.llm_adapter import _normalize_report_lang, get_llm_adapter
+
         normalized_platform = _normalize_platform(platform)
+        lang = _normalize_report_lang(report_lang)
         currency_code, currency_symbol = _currency_for_platform(normalized_platform)
         prices = [item["price"] for item in products if isinstance(item.get("price"), (int, float))]
         review_total = sum(int(item.get("review_count") or 0) for item in products)
@@ -378,8 +388,34 @@ class ApifyAmazonScraperService:
             for token in re.findall(r"[A-Za-z0-9\u4e00-\u9fff]+", item["title"])
             if len(token) > 1
         )
+        median_price = round(sorted(prices)[len(prices) // 2], 2) if prices else None
+        metrics = {
+            "product_count": len(products),
+            "price_min": round(min(prices), 2) if prices else None,
+            "price_median": median_price,
+            "price_max": round(max(prices), 2) if prices else None,
+            "avg_rating": round(sum(ratings) / len(ratings), 2) if ratings else None,
+            "review_total": review_total,
+            "top_brand_share": round(top_brand[0][1] / len(products), 2) if top_brand else None,
+            "currency_symbol": currency_symbol,
+        }
 
-        platform_label = "淘宝" if normalized_platform == "taobao" else "Amazon"
+        llm = get_llm_adapter()
+        enrichment = llm.enrich_report(
+            keyword=keyword,
+            platform=normalized_platform,
+            products=products,
+            metrics=metrics,
+            report_lang=lang,
+        )
+        source_tag = str(enrichment.get("_source") or "fallback")
+        if source_tag not in {"openrouter", "fallback", "mock"}:
+            source_tag = "fallback"
+
+        listing_focus = enrichment.get("listing_focus") or [token for token, _ in title_tokens.most_common(5)]
+        suggested_price = enrichment.get("suggested_price")
+        if suggested_price is None:
+            suggested_price = median_price
 
         return {
             "summary": {
@@ -390,34 +426,21 @@ class ApifyAmazonScraperService:
                 "currency_code": currency_code,
                 "currency_symbol": currency_symbol,
             },
-            "metrics": {
-                "product_count": len(products),
-                "price_min": round(min(prices), 2) if prices else None,
-                "price_median": round(sorted(prices)[len(prices) // 2], 2) if prices else None,
-                "price_max": round(max(prices), 2) if prices else None,
-                "avg_rating": round(sum(ratings) / len(ratings), 2) if ratings else None,
-                "review_total": review_total,
-                "top_brand_share": round(top_brand[0][1] / len(products), 2) if top_brand else None,
-                "currency_symbol": currency_symbol,
-            },
+            "metrics": metrics,
             "price_distribution": _build_price_distribution(prices, currency_symbol),
             "top_competitors": top_competitors,
             "voc": {
-                "pain_points": [
-                    "搜索报告基于公开搜索结果信号；评论和问答 VOC 需要单独做深度抓取。",
-                ],
-                "selling_points": [
-                    "价格、评分、评论数、品牌、图片、ASIN 和商品链接会从实时采集中统一整理。",
-                ],
-                "visual_style": [
-                    "Top 20 竞品卡片",
-                    "Top 50 市场筛选",
-                ],
+                "pain_points": enrichment.get("pain_points") or [],
+                "selling_points": enrichment.get("selling_points") or [],
+                "visual_style": enrichment.get("visual_style") or [],
             },
             "recommendation": {
-                "suggested_price": round(sorted(prices)[len(prices) // 2], 2) if prices else None,
-                "positioning": f"基于 {platform_label} 搜索结果的市场定位",
-                "listing_focus": [token for token, _ in title_tokens.most_common(5)],
+                "suggested_price": suggested_price,
+                "positioning": enrichment.get("positioning") or "",
+                "listing_focus": listing_focus[:5],
             },
+            "narrative": enrichment.get("narrative") or "",
+            "report_lang": lang,
+            "llm_source": source_tag,
             "source": "live_data",
         }

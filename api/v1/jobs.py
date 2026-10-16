@@ -37,9 +37,18 @@ def _apify_runtime_diagnostic() -> str:
 def _safe_error_message(exc: Exception) -> str:
     message = str(exc).strip() or type(exc).__name__
     for name, value in os.environ.items():
-        if name.startswith("APIFY") and value:
+        if (name.startswith("APIFY") or name.startswith("OPENROUTER")) and value:
             message = message.replace(value, "[已隐藏]")
     return message[:500]
+
+
+def _normalize_report_lang(value: Any) -> str:
+    raw = str(value or "zh").strip().lower().replace("_", "-")
+    if raw in {"en", "en-us", "en-gb", "english"}:
+        return "en"
+    if raw in {"zh", "zh-cn", "zh-hans", "cn", "chinese"}:
+        return "zh"
+    return "zh"
 
 def _json_response(handler: BaseHTTPRequestHandler, status: int, payload: dict[str, Any]) -> None:
     body = json.dumps(payload, ensure_ascii=False, default=str).encode("utf-8")
@@ -82,7 +91,7 @@ def _price_distribution(prices: list[float]) -> list[dict[str, Any]]:
     return result
 
 
-def _completed_job(keyword: str, platform: str, locale: str, top_n: int) -> dict[str, Any]:
+def _completed_job(keyword: str, platform: str, locale: str, top_n: int, report_lang: str = "zh") -> dict[str, Any]:
     scraper = ApifyAmazonScraperService(debug_mode=False)
     if not scraper.is_configured_for(platform):
         raise RuntimeError(
@@ -94,7 +103,9 @@ def _completed_job(keyword: str, platform: str, locale: str, top_n: int) -> dict
     products = asyncio.run(scraper.search_top_products(keyword, locale, top_n, platform=platform))
     if not products:
         raise RuntimeError("实时数据源没有返回商品结果。")
-    report = scraper.build_report(keyword, locale, top_n, products, platform=platform)
+    report = scraper.build_report(
+        keyword, locale, top_n, products, platform=platform, report_lang=report_lang
+    )
     now = _now_iso()
     return {
         "job_id": str(uuid4()),
@@ -104,6 +115,7 @@ def _completed_job(keyword: str, platform: str, locale: str, top_n: int) -> dict
         "platform": platform,
         "locale": locale,
         "top_n": top_n,
+        "report_lang": report_lang,
         "created_at": now,
         "updated_at": now,
         "error_message": None,
@@ -128,7 +140,8 @@ class handler(BaseHTTPRequestHandler):
                 return
             locale = str(payload.get("locale") or "US")
             top_n = min(max(int(payload.get("top_n") or 50), 1), MAX_TOP_N)
-            _json_response(self, 200, _completed_job(keyword, platform, locale, top_n))
+            report_lang = _normalize_report_lang(payload.get("report_lang") or payload.get("lang") or "zh")
+            _json_response(self, 200, _completed_job(keyword, platform, locale, top_n, report_lang=report_lang))
         except RuntimeError as exc:
             message = str(exc)
             status = 503 if "未配置" in message else 502

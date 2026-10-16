@@ -16,7 +16,7 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _create_job(keyword: str, platform: str = "amazon", locale: str = "US", top_n: int = 50) -> dict[str, Any]:
+def _create_job(keyword: str, platform: str = "amazon", locale: str = "US", top_n: int = 50, report_lang: str = "zh") -> dict[str, Any]:
     job_id = uuid4()
     job = {
         "job_id": str(job_id),
@@ -26,6 +26,7 @@ def _create_job(keyword: str, platform: str = "amazon", locale: str = "US", top_
         "platform": platform,
         "locale": locale,
         "top_n": top_n,
+        "report_lang": report_lang,
         "created_at": _now_iso(),
         "updated_at": _now_iso(),
         "report": None,
@@ -36,16 +37,17 @@ def _create_job(keyword: str, platform: str = "amazon", locale: str = "US", top_
     return job
 
 
-def create_apify_job(keyword: str, platform: str = "amazon", locale: str = "US", top_n: int = 50) -> dict[str, Any]:
-    return _create_job(keyword=keyword, platform=platform, locale=locale, top_n=top_n)
+def create_apify_job(keyword: str, platform: str = "amazon", locale: str = "US", top_n: int = 50, report_lang: str = "zh") -> dict[str, Any]:
+    return _create_job(keyword=keyword, platform=platform, locale=locale, top_n=top_n, report_lang=report_lang)
 
 
-def create_search_job(keyword: str, platform: str = "amazon", locale: str = "US", top_n: int = 50) -> dict[str, Any]:
+def create_search_job(keyword: str, platform: str = "amazon", locale: str = "US", top_n: int = 50, report_lang: str = "zh") -> dict[str, Any]:
     return create_apify_job(
         keyword=keyword,
         platform=platform,
         locale=locale,
         top_n=min(top_n, MAX_SEARCH_TOP_N),
+        report_lang=report_lang,
     )
 
 
@@ -69,7 +71,14 @@ async def _run_job(job_id: UUID) -> None:
             raise RuntimeError("实时数据源没有返回商品结果。")
         job["progress"] = 90
         job["updated_at"] = _now_iso()
-        job["report"] = APIFY.build_report(job["keyword"], job["locale"], job["top_n"], products, platform=job["platform"])
+        job["report"] = APIFY.build_report(
+            job["keyword"],
+            job["locale"],
+            job["top_n"],
+            products,
+            platform=job["platform"],
+            report_lang=job.get("report_lang") or "zh",
+        )
         job["status"] = "completed"
         job["progress"] = 100
         job["updated_at"] = _now_iso()

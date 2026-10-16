@@ -14,6 +14,7 @@ class JobCreateRequest(BaseModel):
     platform: str = "amazon"
     locale: str = "US"
     top_n: int = Field(default=50, ge=1, le=50)
+    report_lang: str = "zh"
 
 
 class JobCreateResponse(BaseModel):
@@ -31,6 +32,7 @@ class JobStatusResponse(BaseModel):
     platform: str
     locale: str
     top_n: int
+    report_lang: str | None = None
     created_at: str
     updated_at: str
     error_message: str | None = None
@@ -44,6 +46,7 @@ async def create_job(payload: JobCreateRequest) -> JobCreateResponse:
         platform=payload.platform,
         locale=payload.locale,
         top_n=payload.top_n,
+        report_lang=payload.report_lang,
     )
     return JobCreateResponse(
         job_id=job["job_id"],

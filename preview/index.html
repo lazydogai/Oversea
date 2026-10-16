@@ -352,8 +352,11 @@
             <div class="pill-list" id="sellingPoints"></div>
             <p class="label" style="margin-top:18px;" data-i18n="label_visual">视觉风格</p>
             <div class="pill-list" id="visualStyle"></div>
+            <p class="label" style="margin-top:18px;" data-i18n="sec_narrative">市场简报</p>
+            <div class="empty-state" id="narrativeBox" data-i18n="wait_report">等待报告。</div>
             <p class="label" style="margin-top:18px;" data-i18n="label_reco">建议</p>
             <div class="empty-state" id="recommendationBox" data-i18n="wait_report">等待报告。</div>
+            <p class="notice" id="langRerunNotice" style="display:none;margin-top:12px;"></p>
           </div>
         </section>
         <section class="content" style="border-bottom: 0; border-top: 1px solid var(--line);">
@@ -436,7 +439,10 @@
           "label_selling": "卖点",
           "label_visual": "视觉风格",
           "label_reco": "建议",
-          "wait_report": t("wait_report"),
+          "sec_narrative": "市场简报",
+          "lang_rerun_notice": "报告正文语言由分析时决定。切换界面语言后请重新点击「开始分析」以生成对应语言的 LLM 洞察。",
+          "label_listing_focus": "Listing 重点",
+          "wait_report": "等待报告。",
           "sec_rows": "采集数据行",
           "table_note": "报告会展示整理后的商品数据。每行都会保留图片、ASIN 和可点击的 Amazon 商品链接。",
           "tone_error": "错误",
@@ -499,9 +505,9 @@
           "yes": "是",
           "open": "打开",
           "waiting_result": "报告任务已创建，正在等待结果。",
-          "empty_pain": t("empty_pain"),
-          "empty_selling": t("empty_selling"),
-          "empty_visual": t("empty_visual"),
+          "empty_pain": "暂无痛点。",
+          "empty_selling": "暂无卖点。",
+          "empty_visual": "暂无视觉风格。",
           "src_live": "实时数据源",
           "src_snapshot": "数据快照",
           "src_report": "报告数据",
@@ -607,6 +613,9 @@
           "label_selling": "Selling points",
           "label_visual": "Visual style",
           "label_reco": "Recommendations",
+          "sec_narrative": "Market brief",
+          "lang_rerun_notice": "Report body language is set when you run analysis. After switching UI language, click Analyze again to regenerate LLM insights in that language.",
+          "label_listing_focus": "Listing focus",
           "wait_report": "Waiting for report.",
           "sec_rows": "Collected rows",
           "table_note": "The report shows normalized product rows. Each row keeps the image, ASIN, and a clickable Amazon product link.",
@@ -811,6 +820,8 @@
         progressChips: Array.from(document.querySelectorAll("[data-status]")),
         rawTable: document.getElementById("rawTable"),
         recommendationBox: document.getElementById("recommendationBox"),
+        narrativeBox: document.getElementById("narrativeBox"),
+        langRerunNotice: document.getElementById("langRerunNotice"),
         reportsBtn: document.getElementById("reportsBtn"),
         ratingBreakdown: document.getElementById("ratingBreakdown"),
         ratingFilter: document.getElementById("ratingFilter"),
@@ -1342,6 +1353,8 @@
           els.jobMeta.textContent = `${platformLabel(job.platform)} · ${job.locale} · ${job.top_n}`;
           els.jobProgressValue.textContent = `${job.progress}%`;
           els.recommendationBox.textContent = t("wait_report");
+          if (els.narrativeBox) els.narrativeBox.textContent = t("wait_report");
+          if (els.langRerunNotice) els.langRerunNotice.style.display = "none";
           renderPriceChart([]);
           renderCompetitors([]);
           renderRawTable([]);
@@ -1372,13 +1385,27 @@
 
         const metrics = report.metrics || {};
         const recommendation = report.recommendation || {};
+        const focus = (recommendation.listing_focus || []).filter(Boolean).join(" · ") || "—";
         els.recommendationBox.innerHTML = `
           <div style="display:grid; gap:8px;">
             <div><strong>${t("reco_positioning")}</strong> ${recommendation.positioning || "—"}</div>
             <div><strong>${t("reco_price")}</strong> ${currency(recommendation.suggested_price)}</div>
+            <div><strong>${t("label_listing_focus")}</strong> ${focus}</div>
             <div><strong>${t("reco_counts")}</strong> ${metrics.product_count ?? "—"} · <strong>${t("reco_rating")}</strong> ${metrics.avg_rating ?? "—"} · <strong>${t("reco_reviews")}</strong> ${metrics.review_total ?? "—"}</div>
           </div>
         `;
+        if (els.narrativeBox) {
+          const narrative = (report.narrative || "").trim();
+          if (narrative) {
+            els.narrativeBox.innerHTML = narrative
+              .split(/\n\n+/)
+              .map((p) => `<p style="margin:0 0 10px;">${p.replace(/</g, "&lt;")}</p>`)
+              .join("");
+          } else {
+            els.narrativeBox.textContent = t("wait_report");
+          }
+        }
+        if (els.langRerunNotice) els.langRerunNotice.style.display = "none";
 
         currentReport = report;
         populateBrandFilter(report.top_competitors || []);
@@ -1481,6 +1508,7 @@
               platform: els.platformSelect?.value || "amazon",
               locale: "US",
               top_n: Number.isFinite(TOP_N) ? TOP_N : 50,
+              report_lang: currentLang === "en" ? "en" : "zh",
             }),
           });
 
@@ -1538,6 +1566,8 @@
         els.jobState.textContent = t("job_submit_hint");
         els.jobProgressValue.textContent = "--";
         els.recommendationBox.textContent = t("wait_report");
+        if (els.narrativeBox) els.narrativeBox.textContent = t("wait_report");
+        if (els.langRerunNotice) els.langRerunNotice.style.display = "none";
         renderPriceChart([]);
         renderCompetitors([]);
         renderRawTable([]);
@@ -1586,35 +1616,39 @@
       }
 
       window.onLangChange = () => {
-        // Re-render dynamic report UI in the new language
+        // Re-render dynamic report UI chrome in the new language (VOC body stays as generated)
         if (currentReport) {
           updateFilteredReport();
-          const jobLike = {
-            status: "completed",
-            progress: 100,
-            job_id: "—",
-            keyword: currentReport.summary?.keyword || "",
-            platform: currentReport.summary?.platform || "amazon",
-            locale: currentReport.summary?.locale || "US",
-            top_n: currentReport.summary?.top_n || 50,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            error_message: null,
-            report: currentReport,
-          };
-          // Keep recommendation / voc labels refreshed
           renderList(els.painPoints, currentReport.voc?.pain_points || [], t("empty_pain"));
           renderList(els.sellingPoints, currentReport.voc?.selling_points || [], t("empty_selling"));
           renderList(els.visualStyle, currentReport.voc?.visual_style || [], t("empty_visual"));
           const recommendation = currentReport.recommendation || {};
           const metrics = currentReport.metrics || {};
+          const focus = (recommendation.listing_focus || []).filter(Boolean).join(" · ") || "—";
           els.recommendationBox.innerHTML = `
             <div style="display:grid; gap:8px;">
               <div><strong>${t("reco_positioning")}</strong> ${recommendation.positioning || "—"}</div>
               <div><strong>${t("reco_price")}</strong> ${currency(recommendation.suggested_price)}</div>
+              <div><strong>${t("label_listing_focus")}</strong> ${focus}</div>
               <div><strong>${t("reco_counts")}</strong> ${metrics.product_count ?? "—"} · <strong>${t("reco_rating")}</strong> ${metrics.avg_rating ?? "—"} · <strong>${t("reco_reviews")}</strong> ${metrics.review_total ?? "—"}</div>
             </div>
           `;
+          if (els.narrativeBox) {
+            const narrative = (currentReport.narrative || "").trim();
+            if (narrative) {
+              els.narrativeBox.innerHTML = narrative
+                .split(/\n\n+/)
+                .map((p) => `<p style="margin:0 0 10px;">${p.replace(/</g, "&lt;")}</p>`)
+                .join("");
+            }
+          }
+          const reportLang = currentReport.report_lang === "en" ? "en" : "zh";
+          if (els.langRerunNotice && reportLang !== currentLang) {
+            els.langRerunNotice.style.display = "block";
+            els.langRerunNotice.textContent = t("lang_rerun_notice");
+          } else if (els.langRerunNotice) {
+            els.langRerunNotice.style.display = "none";
+          }
         } else {
           clearMarketReport();
           renderPriceChart([]);
@@ -1624,10 +1658,8 @@
           renderList(els.sellingPoints, [], t("empty_selling"));
           renderList(els.visualStyle, [], t("empty_visual"));
           els.recommendationBox.textContent = t("wait_report");
-        }
-        // refresh notice label only if still ready-looking
-        if (els.apiNotice && els.apiNotice.innerHTML.indexOf("<strong>") >= 0) {
-          // leave detailed notice; chips already have data-i18n
+          if (els.narrativeBox) els.narrativeBox.textContent = t("wait_report");
+          if (els.langRerunNotice) els.langRerunNotice.style.display = "none";
         }
       };
       bindLangToggle();

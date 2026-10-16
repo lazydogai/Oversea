@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Wired OpenRouter LLM adapter (`OpenRouterLLMAdapter`) for bilingual VOC, listing recommendations, and market-brief narrative (`report_lang` zh|en); MockLLMAdapter remains the no-key fallback.
+- Preview sends `report_lang` with each job and shows `report.narrative`; language switch after load prompts re-running analysis for LLM language.
 - Created project direction file `AGENT.md`.
 - Created compatibility pointer `AGENTS.md`.
 - Created MVP roadmap in `ROADMAP.md`.
