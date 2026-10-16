@@ -42,3 +42,32 @@ All notable changes to this project will be documented in this file.
 - TikTok Shop, eBay, and multi-platform publishing are postponed.
 - Amazon competitor search will use scraper / Apify first.
 - Amazon listing validation will use SP-API Product Type Definitions and Listings Items validation preview.
+# Changelog — bilingual UI (zh-CN ↔ EN)
+
+**Date:** 2026-10-16  
+**Scope:** Formal Oversea product pages + sample keyword market brief
+
+## Added
+- Language toggle **中文 | EN** on:
+  - `index.html` (landing)
+  - `preview/index.html` (Market Report V1)
+  - `briefs/yoga-pro-mouse.html` (human-style keyword market brief)
+- `I18N` dictionaries + `t()` / `applyLang()` — persist via `localStorage` key `oversea_lang`, sync `?lang=en|zh` in the URL
+- Default language: **zh**; URL `?lang=en` or stored preference overrides
+- Sample brief markdowns under `briefs/`:
+  - `MARKET_BRIEF_yoga_pro_mouse.md` (zh / Cantonese-flavored source)
+  - `MARKET_BRIEF_yoga_pro_mouse.en.md` (English formal brief, same facts)
+
+## Changed
+- All user-facing UI strings on landing + preview switch with language (labels, buttons, empty states, notices, table headers, filters, steps, KPIs, insight templates, status chips)
+- Product / title / ASIN data from API remains as returned (not translated)
+
+## Notes for deploy
+1. Copy staged files into Oversea repo root (preserve `preview/` and `briefs/` paths).
+2. Push to `github.com/lazydogai/Oversea` — Vercel project `oversea` / `oversea-gamma` will pick up.
+3. Do **not** commit `secrets/` or OpenRouter keys.
+
+## Verify
+- Open `/` → toggle EN → hero, nav, features, CTA all English
+- Open `/preview/?lang=en` → chips, filters, KPIs, empty states English; after a report, insight cards + table headers English
+- Open `/briefs/yoga-pro-mouse.html?lang=en` → full English brief; switch back to 中文

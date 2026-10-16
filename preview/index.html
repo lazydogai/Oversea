@@ -141,6 +141,32 @@
       .insight h3 { margin: 0 0 10px; font-size: 15px; }
       .insight p { margin: 0; color: var(--subtle); font-size: 13px; line-height: 1.45; }
       .table-note { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: -6px; margin-bottom: 14px; }
+
+      .lang-toggle {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        overflow: hidden;
+        height: 40px;
+      }
+      .lang-toggle button {
+        border: 0 !important;
+        border-right: 1px solid var(--line) !important;
+        background: var(--surface);
+        color: var(--ink);
+        padding: 0 12px;
+        height: 100%;
+        width: auto;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .lang-toggle button:last-child { border-right: 0 !important; }
+      .lang-toggle button.active {
+        background: var(--ink);
+        color: var(--surface);
+      }
+
       @media (max-width: 860px) {
         main { grid-template-columns: 1fr; }
         aside { display: none; }
@@ -163,68 +189,72 @@
       <section class="page">
         <header>
           <div>
-            <p class="eyebrow">竞品搜索分析平台 V1</p>
-            <h1>Amazon / Taobao 搜索分析报告</h1>
+            <p class="eyebrow" data-i18n="eyebrow">竞品搜索分析平台 V1</p>
+            <h1 data-i18n="page_h1">Amazon / Taobao 搜索分析报告</h1>
           </div>
           <div class="actions">
-            <button id="reportsBtn" type="button">报告</button>
-            <button id="newSearchBtn" class="primary" type="button">新搜索</button>
+            <div class="lang-toggle" role="group" aria-label="Language">
+              <button type="button" data-lang="zh">中文</button>
+              <button type="button" data-lang="en">EN</button>
+            </div>
+            <button id="reportsBtn" type="button" data-i18n="btn_reports">报告</button>
+            <button id="newSearchBtn" class="primary" type="button" data-i18n="btn_new_search">新搜索</button>
           </div>
         </header>
         <section class="content">
           <div class="panel">
             <form class="search" id="searchForm">
-              <input id="keywordInput" value="" placeholder="例如：wireless mouse" aria-label="Amazon keyword" />
-              <select id="platformSelect" aria-label="平台">
+              <input id="keywordInput" value="" data-i18n-placeholder="ph_keyword" placeholder="例如：wireless mouse" aria-label="Amazon keyword" />
+              <select id="platformSelect" data-i18n-aria="aria_platform" aria-label="平台">
                 <option value="amazon">Amazon</option>
                 <option value="taobao">Taobao</option>
               </select>
-              <button id="analyzeBtn" type="submit">开始分析</button>
+              <button id="analyzeBtn" type="submit" data-i18n="btn_analyze">开始分析</button>
             </form>
-            <p class="notice" id="apiNotice">数据状态：<strong>就绪</strong></p>
+            <p class="notice" id="apiNotice" data-i18n-html="notice_ready_html">数据状态：<strong>就绪</strong></p>
             <div class="status" aria-label="Pipeline status">
-              <div class="chip active" data-status="queued">排队中</div>
-              <div class="chip" data-status="running">运行中</div>
-              <div class="chip" data-status="completed">已完成</div>
+              <div class="chip active" data-status="queued" data-i18n="status_queued">排队中</div>
+              <div class="chip" data-status="running" data-i18n="status_running">运行中</div>
+              <div class="chip" data-status="completed" data-i18n="status_completed">已完成</div>
             </div>
-            <section class="metrics" aria-label="报告指标">
-              <div class="metric"><p class="label">搜索范围</p><p class="value" id="searchScopeValue">Top 50</p></div>
-              <div class="metric"><p class="label">深度分析</p><p class="value" id="deepDiveValue">Top 20</p></div>
-              <div class="metric"><p class="label">当前平台</p><p class="value" id="focusValue">Amazon</p></div>
+            <section class="metrics" data-i18n-aria="aria_metrics" aria-label="报告指标">
+              <div class="metric"><p class="label" data-i18n="metric_scope">搜索范围</p><p class="value" id="searchScopeValue">Top 50</p></div>
+              <div class="metric"><p class="label" data-i18n="metric_deep">深度分析</p><p class="value" id="deepDiveValue">Top 20</p></div>
+              <div class="metric"><p class="label" data-i18n="metric_platform">当前平台</p><p class="value" id="focusValue">Amazon</p></div>
             </section>
-            <div class="chart" aria-label="价格分布">
+            <div class="chart" data-i18n-aria="aria_price_chart" aria-label="价格分布">
               <div id="priceChart" style="display: contents;"></div>
             </div>
           </div>
           <div class="panel">
             <div class="flow">
-              <div class="step"><div class="num">01</div><div><h2>创建报告任务</h2><p>系统会创建报告任务，并在完成后返回市场分析结果。</p></div></div>
-              <div class="step"><div class="num">02</div><div><h2>采集 Amazon / Taobao Top 50</h2><p>系统读取公开搜索结果，并统一整理为可分析的商品数据。</p></div></div>
-              <div class="step"><div class="num">03</div><div><h2>生成 Listing 建议</h2><p>把 VOC、痛点与产品规格转成可执行的 Listing 优化方向。</p></div></div>
-              <div class="step"><div class="num">04</div><div><h2>字段完整度校验</h2><p>检查标题、卖点、关键词、图片与价格等核心字段是否完整。</p></div></div>
+              <div class="step"><div class="num">01</div><div><h2 data-i18n="step1_h">创建报告任务</h2><p data-i18n="step1_p">系统会创建报告任务，并在完成后返回市场分析结果。</p></div></div>
+              <div class="step"><div class="num">02</div><div><h2 data-i18n="step2_h">采集 Amazon / Taobao Top 50</h2><p data-i18n="step2_p">系统读取公开搜索结果，并统一整理为可分析的商品数据。</p></div></div>
+              <div class="step"><div class="num">03</div><div><h2 data-i18n="step3_h">生成 Listing 建议</h2><p data-i18n="step3_p">把 VOC、痛点与产品规格转成可执行的 Listing 优化方向。</p></div></div>
+              <div class="step"><div class="num">04</div><div><h2 data-i18n="step4_h">字段完整度校验</h2><p data-i18n="step4_p">检查标题、卖点、关键词、图片与价格等核心字段是否完整。</p></div></div>
             </div>
           </div>
         </section>
         <section class="bottom">
-          <div><p class="label">队列</p><strong>任务处理</strong></div>
-          <div><p class="label">数据</p><strong>结构化存储</strong></div>
-          <div><p class="label">分析</p><strong>VOC 洞察</strong></div>
-          <div><p class="label">校验</p><strong>字段检查</strong></div>
+          <div><p class="label" data-i18n="bottom_q_l">队列</p><strong data-i18n="bottom_q_v">任务处理</strong></div>
+          <div><p class="label" data-i18n="bottom_d_l">数据</p><strong data-i18n="bottom_d_v">结构化存储</strong></div>
+          <div><p class="label" data-i18n="bottom_a_l">分析</p><strong data-i18n="bottom_a_v">VOC 洞察</strong></div>
+          <div><p class="label" data-i18n="bottom_c_l">校验</p><strong data-i18n="bottom_c_v">字段检查</strong></div>
         </section>
         <section class="content" id="reportsSection" style="border-bottom: 0; border-top: 1px solid var(--line);">
           <div class="panel" style="grid-column: 1 / -1;">
             <div class="report-heading">
               <div>
-                <h2 class="section-title">市场报告 V1</h2>
-                <p class="notice" style="margin-top:0;">使用关键词商品数据生成市场视图。筛选器会即时重算 KPI、分布、竞品清单和表格。</p>
+                <h2 class="section-title" data-i18n="report_v1_title">市场报告 V1</h2>
+                <p class="notice" style="margin-top:0;" data-i18n="report_v1_notice">使用关键词商品数据生成市场视图。筛选器会即时重算 KPI、分布、竞品清单和表格。</p>
               </div>
               <div class="report-count" id="filteredCount">0 / 0 rows</div>
             </div>
-            <div class="filter-grid" aria-label="市场报告筛选">
+            <div class="filter-grid" data-i18n-aria="aria_filters" aria-label="市场报告筛选">
               <div class="field">
-                <label for="ratingFilter">最低评分</label>
+                <label for="ratingFilter" data-i18n="filter_min_rating">最低评分</label>
                 <select id="ratingFilter">
-                  <option value="">全部</option>
+                  <option value="" data-i18n="opt_all">全部</option>
                   <option value="4">4.0+</option>
                   <option value="4.3">4.3+</option>
                   <option value="4.5">4.5+</option>
@@ -232,39 +262,39 @@
                 </select>
               </div>
               <div class="field">
-                <label for="priceMinFilter">最低价格</label>
+                <label for="priceMinFilter" data-i18n="filter_min_price">最低价格</label>
                 <input id="priceMinFilter" type="number" min="0" step="1" placeholder="0" />
               </div>
               <div class="field">
-                <label for="priceMaxFilter">最高价格</label>
+                <label for="priceMaxFilter" data-i18n="filter_max_price">最高价格</label>
                 <input id="priceMaxFilter" type="number" min="0" step="1" placeholder="80" />
               </div>
               <div class="field">
-                <label for="reviewMinFilter">最低评论数</label>
+                <label for="reviewMinFilter" data-i18n="filter_min_reviews">最低评论数</label>
                 <input id="reviewMinFilter" type="number" min="0" step="100" placeholder="0" />
               </div>
               <div class="field">
-                <label for="brandFilter">品牌</label>
-                <select id="brandFilter"><option value="">全部品牌</option></select>
+                <label for="brandFilter" data-i18n="filter_brand">品牌</label>
+                <select id="brandFilter"><option value="" data-i18n="opt_all_brands">全部品牌</option></select>
               </div>
               <div class="field">
-                <span class="field-label">标签</span>
+                <span class="field-label" data-i18n="filter_tags">标签</span>
                 <label class="checkbox-field"><input id="amazonChoiceFilter" type="checkbox" /> Amazon Choice</label>
               </div>
             </div>
-            <div style="margin-top:12px; max-width:180px;"><button class="reset-filter" id="resetFiltersBtn" type="button">重置筛选</button></div>
+            <div style="margin-top:12px; max-width:180px;"><button class="reset-filter" id="resetFiltersBtn" type="button" data-i18n="btn_reset_filters">重置筛选</button></div>
             <div class="market-grid" id="marketKpis"></div>
             <div class="chart-grid">
               <div class="chart-panel">
-                <h3 class="chart-title">价格分布</h3>
+                <h3 class="chart-title" data-i18n="chart_price">价格分布</h3>
                 <div class="bar-list" id="priceBreakdown"></div>
               </div>
               <div class="chart-panel">
-                <h3 class="chart-title">评分分布</h3>
+                <h3 class="chart-title" data-i18n="chart_rating">评分分布</h3>
                 <div class="bar-list" id="ratingBreakdown"></div>
               </div>
               <div class="chart-panel">
-                <h3 class="chart-title">品牌集中度</h3>
+                <h3 class="chart-title" data-i18n="chart_brand">品牌集中度</h3>
                 <div class="bar-list" id="brandBreakdown"></div>
               </div>
             </div>
@@ -277,15 +307,15 @@
               <div class="step">
                 <div class="num" id="jobProgressValue">--</div>
                 <div>
-                  <h2 id="jobTitle">等待分析</h2>
-                  <p id="jobSummary">输入关键词后，系统会创建报告任务并返回分析结果。</p>
+                  <h2 id="jobTitle" data-i18n="job_wait_title">等待分析</h2>
+                  <p id="jobSummary" data-i18n="job_wait_summary">输入关键词后，系统会创建报告任务并返回分析结果。</p>
                 </div>
               </div>
               <div class="step">
-                <div class="num">状态</div>
+                <div class="num" data-i18n="label_status">状态</div>
                 <div>
-                  <h2 id="jobMeta">暂无任务</h2>
-                  <p id="jobState">提交后会创建一个 Amazon 分析任务。</p>
+                  <h2 id="jobMeta" data-i18n="job_no_task">暂无任务</h2>
+                  <p id="jobState" data-i18n="job_submit_hint">提交后会创建一个 Amazon 分析任务。</p>
                 </div>
               </div>
             </div>
@@ -293,17 +323,17 @@
           <div class="panel">
             <div class="flow">
               <div class="step">
-                <div class="num">体验</div>
+                <div class="num" data-i18n="label_ux">体验</div>
                 <div>
-                  <h2>数据连接</h2>
-                  <p>页面会连接数据服务，拿到报告后即时绘制价格分布、VOC、竞品和建议。</p>
+                  <h2 data-i18n="ux_connect_h">数据连接</h2>
+                  <p data-i18n="ux_connect_p">页面会连接数据服务，拿到报告后即时绘制价格分布、VOC、竞品和建议。</p>
                 </div>
               </div>
               <div class="step">
-                <div class="num">状态</div>
+                <div class="num" data-i18n="label_status">状态</div>
                 <div>
-                  <h2 id="apiHealth">数据服务尚未检查</h2>
-                  <p>如果数据服务暂时不可用，点击开始分析会显示错误原因。</p>
+                  <h2 id="apiHealth" data-i18n="api_unchecked">数据服务尚未检查</h2>
+                  <p data-i18n="api_hint">如果数据服务暂时不可用，点击开始分析会显示错误原因。</p>
                 </div>
               </div>
             </div>
@@ -311,26 +341,26 @@
         </section>
         <section class="content" style="border-bottom: 0; border-top: 1px solid var(--line);">
           <div class="panel">
-            <h2 class="section-title">Top 竞品</h2>
+            <h2 class="section-title" data-i18n="sec_competitors">Top 竞品</h2>
             <div class="competitors" id="topCompetitors"></div>
           </div>
           <div class="panel">
-            <h2 class="section-title">VOC 与建议</h2>
-            <p class="label">痛点</p>
+            <h2 class="section-title" data-i18n="sec_voc">VOC 与建议</h2>
+            <p class="label" data-i18n="label_pain">痛点</p>
             <div class="pill-list" id="painPoints"></div>
-            <p class="label" style="margin-top:18px;">卖点</p>
+            <p class="label" style="margin-top:18px;" data-i18n="label_selling">卖点</p>
             <div class="pill-list" id="sellingPoints"></div>
-            <p class="label" style="margin-top:18px;">视觉风格</p>
+            <p class="label" style="margin-top:18px;" data-i18n="label_visual">视觉风格</p>
             <div class="pill-list" id="visualStyle"></div>
-            <p class="label" style="margin-top:18px;">建议</p>
-            <div class="empty-state" id="recommendationBox">等待报告。</div>
+            <p class="label" style="margin-top:18px;" data-i18n="label_reco">建议</p>
+            <div class="empty-state" id="recommendationBox" data-i18n="wait_report">等待报告。</div>
           </div>
         </section>
         <section class="content" style="border-bottom: 0; border-top: 1px solid var(--line);">
           <div class="panel" style="grid-column: 1 / -1;">
-            <h2 class="section-title">采集数据行</h2>
+            <h2 class="section-title" data-i18n="sec_rows">采集数据行</h2>
             <div class="table-note">
-              <p class="notice" style="margin:0;">报告会展示整理后的商品数据。每行都会保留图片、ASIN 和可点击的 Amazon 商品链接。</p>
+              <p class="notice" style="margin:0;" data-i18n="table_note">报告会展示整理后的商品数据。每行都会保留图片、ASIN 和可点击的 Amazon 商品链接。</p>
               <p class="notice" style="margin:0;" id="tableCount">0 rows</p>
             </div>
             <div class="table-wrap" id="rawTable"></div>
@@ -339,6 +369,412 @@
       </section>
     </main>
     <script>
+      const I18N = {
+        "zh": {
+          "doc_title": "竞品搜索分析平台 · 市场报告",
+          "eyebrow": "竞品搜索分析平台 V1",
+          "page_h1": "Amazon / Taobao 搜索分析报告",
+          "btn_reports": "报告",
+          "btn_new_search": "新搜索",
+          "ph_keyword": "例如：wireless mouse",
+          "aria_platform": "平台",
+          "btn_analyze": "开始分析",
+          "notice_ready_html": "数据状态：<strong>就绪</strong>",
+          "status_queued": "排队中",
+          "status_running": "运行中",
+          "status_completed": "已完成",
+          "status_failed": "失败",
+          "aria_metrics": "报告指标",
+          "metric_scope": "搜索范围",
+          "metric_deep": "深度分析",
+          "metric_platform": "当前平台",
+          "aria_price_chart": "价格分布",
+          "step1_h": "创建报告任务",
+          "step1_p": "系统会创建报告任务，并在完成后返回市场分析结果。",
+          "step2_h": "采集 Amazon / Taobao Top 50",
+          "step2_p": "系统读取公开搜索结果，并统一整理为可分析的商品数据。",
+          "step3_h": "生成 Listing 建议",
+          "step3_p": "把 VOC、痛点与产品规格转成可执行的 Listing 优化方向。",
+          "step4_h": "字段完整度校验",
+          "step4_p": "检查标题、卖点、关键词、图片与价格等核心字段是否完整。",
+          "bottom_q_l": "队列",
+          "bottom_q_v": "任务处理",
+          "bottom_d_l": "数据",
+          "bottom_d_v": "结构化存储",
+          "bottom_a_l": "分析",
+          "bottom_a_v": "VOC 洞察",
+          "bottom_c_l": "校验",
+          "bottom_c_v": "字段检查",
+          "report_v1_title": "市场报告 V1",
+          "report_v1_notice": "使用关键词商品数据生成市场视图。筛选器会即时重算 KPI、分布、竞品清单和表格。",
+          "aria_filters": "市场报告筛选",
+          "filter_min_rating": "最低评分",
+          "opt_all": "全部",
+          "filter_min_price": "最低价格",
+          "filter_max_price": "最高价格",
+          "filter_min_reviews": "最低评论数",
+          "filter_brand": "品牌",
+          "opt_all_brands": "全部品牌",
+          "filter_tags": "标签",
+          "btn_reset_filters": "重置筛选",
+          "chart_price": "价格分布",
+          "chart_rating": "评分分布",
+          "chart_brand": "品牌集中度",
+          "job_wait_title": "等待分析",
+          "job_wait_summary": "输入关键词后，系统会创建报告任务并返回分析结果。",
+          "label_status": "状态",
+          "job_no_task": "暂无任务",
+          "job_submit_hint": "提交后会创建一个 Amazon 分析任务。",
+          "label_ux": "体验",
+          "ux_connect_h": "数据连接",
+          "ux_connect_p": "页面会连接数据服务，拿到报告后即时绘制价格分布、VOC、竞品和建议。",
+          "api_unchecked": "数据服务尚未检查",
+          "api_hint": "如果数据服务暂时不可用，点击开始分析会显示错误原因。",
+          "sec_competitors": "Top 竞品",
+          "sec_voc": "VOC 与建议",
+          "label_pain": "痛点",
+          "label_selling": "卖点",
+          "label_visual": "视觉风格",
+          "label_reco": "建议",
+          "wait_report": t("wait_report"),
+          "sec_rows": "采集数据行",
+          "table_note": "报告会展示整理后的商品数据。每行都会保留图片、ASIN 和可点击的 Amazon 商品链接。",
+          "tone_error": "错误",
+          "tone_loading": "加载中",
+          "tone_ready": "就绪",
+          "notice_prefix": "数据状态：",
+          "empty_price_chart": "暂无价格分布。",
+          "unknown_brand": "未知品牌",
+          "empty_filter_data": "当前筛选没有数据。",
+          "kpi_matched_rows": "匹配数据行",
+          "kpi_median_price": "价格中位数",
+          "kpi_price_range": "价格区间",
+          "kpi_avg_rating": "平均评分",
+          "kpi_total_reviews": "总评论数",
+          "kpi_top_brand_share": "头部品牌占比",
+          "kpi_amazon_choice": "Amazon Choice",
+          "kpi_median_reviews": "评论中位数",
+          "kpi_image_cover": "图片覆盖率",
+          "kpi_link_cover": "链接覆盖率",
+          "kpi_under_30": "$30 以下商品",
+          "kpi_rating_45": "4.5+ 商品",
+          "empty_opportunity": "当前筛选没有机会分层。",
+          "seg_new_title": "新晋机会",
+          "seg_new_body": "{n} 个商品评分 4.5+ 且评论数低于 1,000。适合用来发现尚未被头部商品完全锁定的新角度。",
+          "seg_premium_title": "高价证明",
+          "seg_premium_body": "{n} 个商品价格 $40+ 且评分 4.4+。这有助于判断高价位是否需要更强的材质、保修或功能证明。",
+          "seg_budget_title": "低价压力",
+          "seg_budget_body": "{n} 个商品低于 $25。如果数量较高，Listing Draft 需要非常清晰的价值主张，避免只打价格战。",
+          "seg_head_title": "头部效应",
+          "seg_head_body": "{n} 个商品已有 5,000+ 评论。这类商品应作为基准标杆，而不是直接照抄对象。",
+          "seg_trust_title": "信任标签",
+          "seg_trust_body": "{n} 个商品带有 Amazon Choice 信号。标签密度值得展示，因为它会影响搜索结果页上的用户信任。",
+          "seg_quality_title": "数据质量",
+          "seg_quality_body": "{n} 行缺少图片。系统应提示用户哪些数据行需要重新采集或排除。",
+          "rows_filtered": "{filtered} / {total} 行",
+          "rows_showing": "显示 {shown} / {total} 行",
+          "rows_zero": "0 / 0 行",
+          "rows_zero_simple": "0 行",
+          "empty_market": "运行一次搜索后生成市场报告。",
+          "empty_price_data": "暂无价格数据。",
+          "empty_rating_data": "暂无评分数据。",
+          "empty_brand_data": "暂无品牌数据。",
+          "empty_segments": "暂无机会分层。",
+          "empty_competitors": "暂无竞品数据。",
+          "star_n": "{n} 星",
+          "reviews_n": "{n} 条评论",
+          "competitor_record": "竞品记录",
+          "open_product": "打开 {platform} 商品",
+          "img_connected": "已连接图片",
+          "img_none": "无图片",
+          "empty_raw": "暂无采集数据行。",
+          "th_product": "商品",
+          "th_price": "价格",
+          "th_rating": "评分",
+          "th_reviews": "评论",
+          "th_bsr": "BSR",
+          "th_choice": "Choice",
+          "th_monthly": "月销量",
+          "th_link": "链接",
+          "yes": "是",
+          "open": "打开",
+          "waiting_result": "报告任务已创建，正在等待结果。",
+          "empty_pain": t("empty_pain"),
+          "empty_selling": t("empty_selling"),
+          "empty_visual": t("empty_visual"),
+          "src_live": "实时数据源",
+          "src_snapshot": "数据快照",
+          "src_report": "报告数据",
+          "source_prefix": " · 来源：",
+          "reco_positioning": "定位：",
+          "reco_price": "建议价格：",
+          "reco_counts": "商品数：",
+          "reco_rating": "评分：",
+          "reco_reviews": "评论：",
+          "loading_snapshot": "正在加载真实数据快照",
+          "snapshot_loaded": "真实数据快照已加载",
+          "snapshot_loaded_health": "数据快照已加载",
+          "snapshot_fail": "数据快照加载失败",
+          "report_ready": "报告已生成",
+          "task_failed": "任务失败",
+          "net_error": "网络错误",
+          "data_read_fail": "数据读取失败",
+          "need_keyword": "请输入关键词后开始分析",
+          "wait_keyword": "等待关键词",
+          "keyword_hint": "请输入关键词，例如 wireless mouse。",
+          "submitting": "正在提交任务",
+          "creating_job": "正在创建报告任务",
+          "create_fail": "任务创建失败（{status}）",
+          "queued_ok": "任务已排队",
+          "job_id": "任务 ID {id}",
+          "data_req_fail": "数据请求失败",
+          "req_fail": "请求失败",
+          "job_failed_health": "报告任务失败",
+          "job_status_health": "报告任务{status}",
+          "sample_pain_1": "样本数据保留了 Amazon 商品页的真实结构。",
+          "sample_pain_2": "图片、价格、评分、评论数、ASIN 和商品链接都会保留在同一行。",
+          "sample_sell_1": "可点击的 Amazon 商品链接",
+          "sample_sell_2": "已标准化的图片和价格字段",
+          "sample_sell_3": "已排序的 Top 竞品数据行",
+          "sample_vis_1": "Amazon 商品详情页",
+          "sample_vis_2": "商品网格",
+          "sample_vis_3": "标准化采集表格",
+          "sample_positioning": "关键词市场定位"
+        },
+        "en": {
+          "doc_title": "Competitor Search Analytics · Market Report",
+          "eyebrow": "Competitor Search Analytics V1",
+          "page_h1": "Amazon / Taobao search analysis report",
+          "btn_reports": "Report",
+          "btn_new_search": "New search",
+          "ph_keyword": "e.g. wireless mouse",
+          "aria_platform": "Platform",
+          "btn_analyze": "Analyze",
+          "notice_ready_html": "Data status: <strong>Ready</strong>",
+          "status_queued": "Queued",
+          "status_running": "Running",
+          "status_completed": "Completed",
+          "status_failed": "Failed",
+          "aria_metrics": "Report metrics",
+          "metric_scope": "Search scope",
+          "metric_deep": "Deep dive",
+          "metric_platform": "Platform",
+          "aria_price_chart": "Price distribution",
+          "step1_h": "Create report job",
+          "step1_p": "The system creates a report job and returns market analysis when done.",
+          "step2_h": "Collect Amazon / Taobao Top 50",
+          "step2_p": "Public search results are read and normalized into analyzable product rows.",
+          "step3_h": "Generate Listing suggestions",
+          "step3_p": "Turn VOC, pain points, and specs into actionable Listing improvements.",
+          "step4_h": "Field completeness check",
+          "step4_p": "Verify title, bullets, keywords, images, price, and other core fields.",
+          "bottom_q_l": "Queue",
+          "bottom_q_v": "Job processing",
+          "bottom_d_l": "Data",
+          "bottom_d_v": "Structured store",
+          "bottom_a_l": "Analysis",
+          "bottom_a_v": "VOC insights",
+          "bottom_c_l": "QA",
+          "bottom_c_v": "Field checks",
+          "report_v1_title": "Market Report V1",
+          "report_v1_notice": "Market views are built from keyword product data. Filters recompute KPIs, distributions, competitors, and the table live.",
+          "aria_filters": "Market report filters",
+          "filter_min_rating": "Min. rating",
+          "opt_all": "All",
+          "filter_min_price": "Min. price",
+          "filter_max_price": "Max. price",
+          "filter_min_reviews": "Min. reviews",
+          "filter_brand": "Brand",
+          "opt_all_brands": "All brands",
+          "filter_tags": "Tags",
+          "btn_reset_filters": "Reset filters",
+          "chart_price": "Price distribution",
+          "chart_rating": "Rating distribution",
+          "chart_brand": "Brand concentration",
+          "job_wait_title": "Waiting for analysis",
+          "job_wait_summary": "Enter a keyword to create a report job and receive results.",
+          "label_status": "Status",
+          "job_no_task": "No job yet",
+          "job_submit_hint": "Submitting creates an Amazon analysis job.",
+          "label_ux": "UX",
+          "ux_connect_h": "Data connection",
+          "ux_connect_p": "This page connects to the data service and draws price, VOC, competitors, and suggestions as soon as the report arrives.",
+          "api_unchecked": "Data service not checked yet",
+          "api_hint": "If the data service is unavailable, Analyze shows the error reason.",
+          "sec_competitors": "Top competitors",
+          "sec_voc": "VOC & recommendations",
+          "label_pain": "Pain points",
+          "label_selling": "Selling points",
+          "label_visual": "Visual style",
+          "label_reco": "Recommendations",
+          "wait_report": "Waiting for report.",
+          "sec_rows": "Collected rows",
+          "table_note": "The report shows normalized product rows. Each row keeps the image, ASIN, and a clickable Amazon product link.",
+          "tone_error": "Error",
+          "tone_loading": "Loading",
+          "tone_ready": "Ready",
+          "notice_prefix": "Data status: ",
+          "empty_price_chart": "No price distribution yet.",
+          "unknown_brand": "Unknown brand",
+          "empty_filter_data": "No data for current filters.",
+          "kpi_matched_rows": "Matched rows",
+          "kpi_median_price": "Median price",
+          "kpi_price_range": "Price range",
+          "kpi_avg_rating": "Avg. rating",
+          "kpi_total_reviews": "Total reviews",
+          "kpi_top_brand_share": "Top brand share",
+          "kpi_amazon_choice": "Amazon Choice",
+          "kpi_median_reviews": "Median reviews",
+          "kpi_image_cover": "Image coverage",
+          "kpi_link_cover": "Link coverage",
+          "kpi_under_30": "Under $30",
+          "kpi_rating_45": "4.5+ products",
+          "empty_opportunity": "No opportunity segments for current filters.",
+          "seg_new_title": "Emerging openings",
+          "seg_new_body": "{n} products rated 4.5+ with under 1,000 reviews—useful for angles not fully locked by head ASINs.",
+          "seg_premium_title": "Premium proof",
+          "seg_premium_body": "{n} products at $40+ with 4.4+ ratings. Helps judge whether premium needs stronger materials, warranty, or feature proof.",
+          "seg_budget_title": "Budget pressure",
+          "seg_budget_body": "{n} products under $25. If dense, Listing Draft needs a clear value story—not a pure price war.",
+          "seg_head_title": "Head effect",
+          "seg_head_body": "{n} products already have 5,000+ reviews. Treat them as benchmarks, not copy targets.",
+          "seg_trust_title": "Trust badges",
+          "seg_trust_body": "{n} products carry Amazon Choice signals. Badge density matters for SERP trust.",
+          "seg_quality_title": "Data quality",
+          "seg_quality_body": "{n} rows are missing images. Flag rows that need re-crawl or exclusion.",
+          "rows_filtered": "{filtered} / {total} rows",
+          "rows_showing": "Showing {shown} / {total} rows",
+          "rows_zero": "0 / 0 rows",
+          "rows_zero_simple": "0 rows",
+          "empty_market": "Run a search to generate the market report.",
+          "empty_price_data": "No price data yet.",
+          "empty_rating_data": "No rating data yet.",
+          "empty_brand_data": "No brand data yet.",
+          "empty_segments": "No opportunity segments yet.",
+          "empty_competitors": "No competitor data yet.",
+          "star_n": "{n} stars",
+          "reviews_n": "{n} reviews",
+          "competitor_record": "Competitor row",
+          "open_product": "Open {platform} product",
+          "img_connected": "Image linked",
+          "img_none": "No image",
+          "empty_raw": "No collected rows yet.",
+          "th_product": "Product",
+          "th_price": "Price",
+          "th_rating": "Rating",
+          "th_reviews": "Reviews",
+          "th_bsr": "BSR",
+          "th_choice": "Choice",
+          "th_monthly": "Monthly sold",
+          "th_link": "Link",
+          "yes": "Yes",
+          "open": "Open",
+          "waiting_result": "Report job created; waiting for results.",
+          "empty_pain": "No pain points yet.",
+          "empty_selling": "No selling points yet.",
+          "empty_visual": "No visual style yet.",
+          "src_live": "Live data source",
+          "src_snapshot": "Data snapshot",
+          "src_report": "Report data",
+          "source_prefix": " · Source: ",
+          "reco_positioning": "Positioning: ",
+          "reco_price": "Suggested price: ",
+          "reco_counts": "Products: ",
+          "reco_rating": "Rating: ",
+          "reco_reviews": "Reviews: ",
+          "loading_snapshot": "Loading live data snapshot",
+          "snapshot_loaded": "Live data snapshot loaded",
+          "snapshot_loaded_health": "Data snapshot loaded",
+          "snapshot_fail": "Failed to load data snapshot",
+          "report_ready": "Report ready",
+          "task_failed": "Job failed",
+          "net_error": "Network error",
+          "data_read_fail": "Failed to read data",
+          "need_keyword": "Enter a keyword to start analysis",
+          "wait_keyword": "Waiting for keyword",
+          "keyword_hint": "Enter a keyword, e.g. wireless mouse.",
+          "submitting": "Submitting job",
+          "creating_job": "Creating report job",
+          "create_fail": "Failed to create job ({status})",
+          "queued_ok": "Job queued",
+          "job_id": "Job ID {id}",
+          "data_req_fail": "Data request failed",
+          "req_fail": "Request failed",
+          "job_failed_health": "Report job failed",
+          "job_status_health": "Report job {status}",
+          "sample_pain_1": "Sample data keeps the real Amazon product-page structure.",
+          "sample_pain_2": "Image, price, rating, review count, ASIN, and product link stay on the same row.",
+          "sample_sell_1": "Clickable Amazon product links",
+          "sample_sell_2": "Normalized image and price fields",
+          "sample_sell_3": "Sorted Top competitor rows",
+          "sample_vis_1": "Amazon product detail page",
+          "sample_vis_2": "Product grid",
+          "sample_vis_3": "Normalized crawl table",
+          "sample_positioning": "Keyword market positioning"
+        }
+      };
+
+      const I18N_STORAGE_KEY = "oversea_lang";
+      function detectLang() {
+        const params = new URLSearchParams(window.location.search);
+        const fromUrl = (params.get("lang") || "").toLowerCase();
+        if (fromUrl === "en" || fromUrl === "zh" || fromUrl === "zh-cn") {
+          return fromUrl.startsWith("zh") ? "zh" : "en";
+        }
+        try {
+          const stored = localStorage.getItem(I18N_STORAGE_KEY);
+          if (stored === "en" || stored === "zh") return stored;
+        } catch (_e) {}
+        return "zh";
+      }
+      let currentLang = detectLang();
+      function t(key, vars) {
+        const dict = (I18N[currentLang] || I18N.zh || {});
+        let s = dict[key];
+        if (s === undefined || s === null) s = (I18N.zh || {})[key];
+        if (s === undefined || s === null) return key;
+        if (vars && typeof vars === "object") {
+          Object.keys(vars).forEach((k) => {
+            s = String(s).split("{" + k + "}").join(String(vars[k]));
+          });
+        }
+        return s;
+      }
+      function applyLang(lang) {
+        currentLang = lang === "en" ? "en" : "zh";
+        document.documentElement.lang = currentLang === "en" ? "en" : "zh-CN";
+        try { localStorage.setItem(I18N_STORAGE_KEY, currentLang); } catch (_e) {}
+        const params = new URLSearchParams(window.location.search);
+        params.set("lang", currentLang);
+        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}${window.location.hash || ""}`);
+        document.title = t("doc_title");
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          if (key) el.textContent = t(key);
+        });
+        document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-html");
+          if (key) el.innerHTML = t(key);
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-placeholder");
+          if (key) el.setAttribute("placeholder", t(key));
+        });
+        document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-aria");
+          if (key) el.setAttribute("aria-label", t(key));
+        });
+        document.querySelectorAll(".lang-toggle button").forEach((btn) => {
+          btn.classList.toggle("active", btn.getAttribute("data-lang") === currentLang);
+        });
+        if (typeof window.onLangChange === "function") window.onLangChange(currentLang);
+      }
+      function bindLangToggle() {
+        document.querySelectorAll(".lang-toggle button").forEach((btn) => {
+          btn.addEventListener("click", () => applyLang(btn.getAttribute("data-lang")));
+        });
+      }
+
       const PREVIEW_PARAMS = new URLSearchParams(window.location.search);
       const API_BASE = PREVIEW_PARAMS.get("api") || `${window.location.origin}/api/v1`;
       const DATA_MODE = PREVIEW_PARAMS.get("data") || "api";
@@ -503,23 +939,23 @@
           })),
           voc: {
             pain_points: [
-              "样本数据保留了 Amazon 商品页的真实结构。",
-              "图片、价格、评分、评论数、ASIN 和商品链接都会保留在同一行。",
+              t("sample_pain_1"),
+              t("sample_pain_2"),
             ],
             selling_points: [
-              "可点击的 Amazon 商品链接",
-              "已标准化的图片和价格字段",
-              "已排序的 Top 竞品数据行",
+              t("sample_sell_1"),
+              t("sample_sell_2"),
+              t("sample_sell_3"),
             ],
             visual_style: [
-              "Amazon 商品详情页",
-              "商品网格",
-              "标准化采集表格",
+              t("sample_vis_1"),
+              t("sample_vis_2"),
+              t("sample_vis_3"),
             ],
           },
           recommendation: {
             suggested_price: prices.length ? prices.slice().sort((a, b) => a - b)[Math.floor(prices.length / 2)] : null,
-            positioning: "关键词市场定位",
+            positioning: t("sample_positioning"),
             listing_focus: listingFocus,
           },
         };
@@ -533,8 +969,8 @@
       };
 
       const setNotice = (text, tone = "ready") => {
-        const label = tone === "error" ? "错误" : tone === "loading" ? "加载中" : "就绪";
-        els.apiNotice.innerHTML = `数据状态：<strong>${label}</strong>${text ? ` · ${text}` : ""}`;
+        const label = tone === "error" ? t("tone_error") : tone === "loading" ? t("tone_loading") : t("tone_ready");
+        els.apiNotice.innerHTML = `${t("notice_prefix")}<strong>${label}</strong>${text ? ` · ${text}` : ""}`;
       };
 
       const setActiveStatus = (status) => {
@@ -547,7 +983,7 @@
 
       const renderPriceChart = (items) => {
         if (!items.length) {
-          els.priceChart.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">暂无价格分布。</div>';
+          els.priceChart.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">${t("empty_price_chart")}</div>`;
           return;
         }
 
@@ -600,7 +1036,7 @@
       const topBrands = (items, limit = 6) => {
         const counts = new Map();
         items.forEach((item) => {
-          const brand = item.brand || "未知品牌";
+          const brand = item.brand || t("unknown_brand");
           counts.set(brand, (counts.get(brand) || 0) + 1);
         });
         return Array.from(counts.entries())
@@ -633,7 +1069,7 @@
 
       const renderBreakdown = (target, items, labelKey = "bucket") => {
         if (!items.length || !items.some((item) => item.count > 0)) {
-          target.innerHTML = '<div class="empty-state">当前筛选没有数据。</div>';
+          target.innerHTML = `<div class="empty-state">${t("empty_filter_data")}</div>`;
           return;
         }
         const max = Math.max(...items.map((item) => item.count), 1);
@@ -656,18 +1092,18 @@
         const topBrandShare = brands.length && items.length ? brands[0].count / items.length : null;
         const amazonChoiceCount = items.filter((item) => item.is_amazon_choice).length;
         const kpis = [
-          ["匹配数据行", `${items.length} / ${totalCount}`],
-          ["价格中位数", currency(median(prices))],
-          ["价格区间", prices.length ? `${currency(Math.min(...prices))} - ${currency(Math.max(...prices))}` : "—"],
-          ["平均评分", average(ratings) === null ? "—" : average(ratings).toFixed(2)],
-          ["总评论数", compactNumber(reviews.reduce((sum, value) => sum + value, 0))],
-          ["头部品牌占比", topBrandShare === null ? "—" : `${brands[0].label} ${percent(topBrandShare)}`],
-          ["Amazon Choice", compactNumber(amazonChoiceCount)],
-          ["评论中位数", compactNumber(median(reviews))],
-          ["图片覆盖率", percent(items.length ? items.filter((item) => item.image_url).length / items.length : null)],
-          ["链接覆盖率", percent(items.length ? items.filter((item) => item.product_url || item.asin).length / items.length : null)],
-          ["$30 以下商品", compactNumber(prices.filter((price) => price < 30).length)],
-          ["4.5+ 商品", compactNumber(ratings.filter((rating) => rating >= 4.5).length)],
+          [t("kpi_matched_rows"), `${items.length} / ${totalCount}`],
+          [t("kpi_median_price"), currency(median(prices))],
+          [t("kpi_price_range"), prices.length ? `${currency(Math.min(...prices))} - ${currency(Math.max(...prices))}` : "—"],
+          [t("kpi_avg_rating"), average(ratings) === null ? "—" : average(ratings).toFixed(2)],
+          [t("kpi_total_reviews"), compactNumber(reviews.reduce((sum, value) => sum + value, 0))],
+          [t("kpi_top_brand_share"), topBrandShare === null ? "—" : `${brands[0].label} ${percent(topBrandShare)}`],
+          [t("kpi_amazon_choice"), compactNumber(amazonChoiceCount)],
+          [t("kpi_median_reviews"), compactNumber(median(reviews))],
+          [t("kpi_image_cover"), percent(items.length ? items.filter((item) => item.image_url).length / items.length : null)],
+          [t("kpi_link_cover"), percent(items.length ? items.filter((item) => item.product_url || item.asin).length / items.length : null)],
+          [t("kpi_under_30"), compactNumber(prices.filter((price) => price < 30).length)],
+          [t("kpi_rating_45"), compactNumber(ratings.filter((rating) => rating >= 4.5).length)],
         ];
         els.marketKpis.innerHTML = kpis
           .map(([label, value]) => `<div class="market-card"><p class="label">${label}</p><strong>${value}</strong></div>`)
@@ -676,7 +1112,7 @@
 
       const renderOpportunities = (items) => {
         if (!items.length) {
-          els.opportunityGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">当前筛选没有机会分层。</div>';
+          els.opportunityGrid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">${t("empty_opportunity")}</div>`;
           return;
         }
         const lowReviewWinners = items.filter((item) => toNumber(item.rating) >= 4.5 && toNumber(item.review_count) !== null && toNumber(item.review_count) < 1000).length;
@@ -686,12 +1122,12 @@
         const amazonChoice = items.filter((item) => item.is_amazon_choice).length;
         const missingImage = items.filter((item) => !item.image_url).length;
         const segments = [
-          ["新晋机会", `${lowReviewWinners} 个商品评分 4.5+ 且评论数低于 1,000。适合用来发现尚未被头部商品完全锁定的新角度。`],
-          ["高价证明", `${premiumLeaders} 个商品价格 $40+ 且评分 4.4+。这有助于判断高价位是否需要更强的材质、保修或功能证明。`],
-          ["低价压力", `${budgetCrowd} 个商品低于 $25。如果数量较高，Listing Draft 需要非常清晰的价值主张，避免只打价格战。`],
-          ["头部效应", `${reviewHeavy} 个商品已有 5,000+ 评论。这类商品应作为基准标杆，而不是直接照抄对象。`],
-          ["信任标签", `${amazonChoice} 个商品带有 Amazon Choice 信号。标签密度值得展示，因为它会影响搜索结果页上的用户信任。`],
-          ["数据质量", `${missingImage} 行缺少图片。系统应提示用户哪些数据行需要重新采集或排除。`],
+          [t("seg_new_title"), t("seg_new_body", { n: lowReviewWinners })],
+          [t("seg_premium_title"), t("seg_premium_body", { n: premiumLeaders })],
+          [t("seg_budget_title"), t("seg_budget_body", { n: budgetCrowd })],
+          [t("seg_head_title"), t("seg_head_body", { n: reviewHeavy })],
+          [t("seg_trust_title"), t("seg_trust_body", { n: amazonChoice })],
+          [t("seg_quality_title"), t("seg_quality_body", { n: missingImage })],
         ];
         els.opportunityGrid.innerHTML = segments
           .map(([title, body]) => `<div class="insight"><h3>${title}</h3><p>${body}</p></div>`)
@@ -701,7 +1137,7 @@
       const populateBrandFilter = (items) => {
         const selected = els.brandFilter.value;
         const brands = Array.from(new Set(items.map((item) => item.brand).filter(Boolean))).sort((left, right) => left.localeCompare(right));
-        els.brandFilter.innerHTML = '<option value="">全部品牌</option>' + brands.map((brand) => `<option value="${brand}">${brand}</option>`).join("");
+        els.brandFilter.innerHTML = `<option value="">${t("opt_all_brands")}</option>` + brands.map((brand) => `<option value="${brand}">${brand}</option>`).join("");
         if (brands.includes(selected)) {
           els.brandFilter.value = selected;
         }
@@ -731,8 +1167,8 @@
       const updateFilteredReport = () => {
         const items = currentReport?.top_competitors || [];
         const filtered = applyReportFilters(items);
-        els.filteredCount.textContent = `${filtered.length} / ${items.length} 行`;
-        els.tableCount.textContent = `显示 ${Math.min(filtered.length, 60)} / ${filtered.length} 行`;
+        els.filteredCount.textContent = t("rows_filtered", { filtered: filtered.length, total: items.length });
+        els.tableCount.textContent = t("rows_showing", { shown: Math.min(filtered.length, 60), total: filtered.length });
         renderMarketKpis(filtered, items.length);
         renderBreakdown(els.priceBreakdown, buildPriceDistribution(valuesFor(filtered, "price"), currentCurrencySymbol));
         renderBreakdown(els.ratingBreakdown, buildRatingDistribution(valuesFor(filtered, "rating")));
@@ -745,13 +1181,13 @@
 
       const clearMarketReport = () => {
         currentReport = null;
-        els.filteredCount.textContent = "0 / 0 行";
-        els.tableCount.textContent = "0 行";
-        els.marketKpis.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">运行一次搜索后生成市场报告。</div>';
-        els.priceBreakdown.innerHTML = '<div class="empty-state">暂无价格数据。</div>';
-        els.ratingBreakdown.innerHTML = '<div class="empty-state">暂无评分数据。</div>';
-        els.brandBreakdown.innerHTML = '<div class="empty-state">暂无品牌数据。</div>';
-        els.opportunityGrid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">暂无机会分层。</div>';
+        els.filteredCount.textContent = t("rows_zero");
+        els.tableCount.textContent = t("rows_zero_simple");
+        els.marketKpis.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">${t("empty_market")}</div>`;
+        els.priceBreakdown.innerHTML = `<div class="empty-state">${t("empty_price_data")}</div>`;
+        els.ratingBreakdown.innerHTML = `<div class="empty-state">${t("empty_rating_data")}</div>`;
+        els.brandBreakdown.innerHTML = `<div class="empty-state">${t("empty_brand_data")}</div>`;
+        els.opportunityGrid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">${t("empty_segments")}</div>`;
       };
 
       const resetFilters = () => {
@@ -776,16 +1212,16 @@
 
       const renderFromReport = (job) => {
         setActiveStatus(job.status);
-        const statusText = { queued: "排队中", running: "运行中", completed: "已完成", failed: "失败" }[job.status] || job.status;
-        els.apiHealth.textContent = job.status === "failed" ? "报告任务失败" : `报告任务${statusText}`;
-        els.jobState.textContent = job.error_message ? job.error_message : `任务 ID ${job.job_id}`;
+        const statusText = { queued: t("status_queued"), running: t("status_running"), completed: t("status_completed"), failed: t("status_failed") }[job.status] || job.status;
+        els.apiHealth.textContent = job.status === "failed" ? t("job_failed_health") : t("job_status_health", { status: statusText });
+        els.jobState.textContent = job.error_message ? job.error_message : t("job_id", { id: job.job_id });
         els.jobProgressValue.textContent = `${job.progress}%`;
         renderReport(job);
       };
 
       const renderCompetitors = (items) => {
         if (!items || !items.length) {
-          els.topCompetitors.innerHTML = '<div class="empty-state">暂无竞品数据。</div>';
+          els.topCompetitors.innerHTML = `<div class="empty-state">${t("empty_competitors")}</div>`;
           return;
         }
 
@@ -804,13 +1240,13 @@
               : "";
             const details = [
               item.brand ? item.brand : null,
-               item.rating ? `${item.rating} 星` : null,
+               item.rating ? t("star_n", { n: item.rating }) : null,
               item.asin ? `ASIN ${item.asin}` : null,
               item.bsr ? `BSR ${item.bsr}` : null,
-               item.review_count !== undefined ? `${item.review_count} 条评论` : null,
+               item.review_count !== undefined ? t("reviews_n", { n: item.review_count }) : null,
             ]
               .filter(Boolean)
-              .join(" · ");
+              .join(" · ");  /* details */
 
             return `
               <article class="competitor">
@@ -818,16 +1254,16 @@
                 <div>
                   <div class="rank">#${item.rank}</div>
                   <p class="title">${item.title}</p>
-                  <p class="meta">${details || "竞品记录"}</p>
+                  <p class="meta">${details || t("competitor_record")}</p>
                   ${
                     productUrl
-                       ? `<div class="actions"><a class="product-link" href="${productUrl}" target="_blank" rel="noreferrer">打开 ${platformLabel(currentReport?.summary?.platform)} 商品</a></div>`
+                       ? `<div class="actions"><a class="product-link" href="${productUrl}" target="_blank" rel="noreferrer">${t("open_product", { platform: platformLabel(currentReport?.summary?.platform) })}</a></div>`
                       : ""
                   }
                 </div>
                 <div>
                   <div class="price">${currency(item.price)}</div>
-                  <div class="sub">${item.image_url ? "已连接图片" : "无图片"}</div>
+                  <div class="sub">${item.image_url ? t("img_connected") : t("img_none")}</div>
                 </div>
               </article>
             `;
@@ -837,7 +1273,7 @@
 
       const renderRawTable = (items) => {
         if (!items || !items.length) {
-          els.rawTable.innerHTML = '<div class="empty-state">暂无采集数据行。</div>';
+          els.rawTable.innerHTML = `<div class="empty-state">${t("empty_raw")}</div>`;
           return;
         }
 
@@ -867,9 +1303,9 @@
                 <td>${item.rating ? item.rating : "—"}</td>
                 <td>${item.review_count ?? "—"}</td>
                 <td>${item.bsr ?? "—"}</td>
-                <td>${item.is_amazon_choice ? "是" : "—"}</td>
+                <td>${item.is_amazon_choice ? t("yes") : "—"}</td>
                 <td>${item.monthly_purchase_volume || "—"}</td>
-                <td>${productUrl !== "#" ? `<a class="muted-link" href="${productUrl}" target="_blank" rel="noreferrer">打开</a>` : "—"}</td>
+                <td>${productUrl !== "#" ? `<a class="muted-link" href="${productUrl}" target="_blank" rel="noreferrer">${t("open")}</a>` : "—"}</td>
               </tr>
             `;
           })
@@ -880,14 +1316,14 @@
             <thead>
               <tr>
                 <th></th>
-                <th>商品</th>
-                <th>价格</th>
-                <th>评分</th>
-                <th>评论</th>
-                <th>BSR</th>
-                <th>Choice</th>
-                <th>月销量</th>
-                <th>链接</th>
+                <th>${t("th_product")}</th>
+                <th>${t("th_price")}</th>
+                <th>${t("th_rating")}</th>
+                <th>${t("th_reviews")}</th>
+                <th>${t("th_bsr")}</th>
+                <th>${t("th_choice")}</th>
+                <th>${t("th_monthly")}</th>
+                <th>${t("th_link")}</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -902,17 +1338,17 @@
           els.deepDiveValue.textContent = "Top 20";
           els.focusValue.textContent = platformLabel(job.platform);
           els.jobTitle.textContent = `${job.keyword} / ${job.status}`;
-          els.jobSummary.textContent = "报告任务已创建，正在等待结果。";
+          els.jobSummary.textContent = t("waiting_result");
           els.jobMeta.textContent = `${platformLabel(job.platform)} · ${job.locale} · ${job.top_n}`;
           els.jobProgressValue.textContent = `${job.progress}%`;
-          els.recommendationBox.textContent = "等待报告。";
+          els.recommendationBox.textContent = t("wait_report");
           renderPriceChart([]);
           renderCompetitors([]);
           renderRawTable([]);
           clearMarketReport();
-          renderList(els.painPoints, [], "暂无痛点。");
-          renderList(els.sellingPoints, [], "暂无卖点。");
-          renderList(els.visualStyle, [], "暂无视觉风格。");
+          renderList(els.painPoints, [], t("empty_pain"));
+          renderList(els.sellingPoints, [], t("empty_selling"));
+          renderList(els.visualStyle, [], t("empty_visual"));
           return;
         }
 
@@ -925,31 +1361,31 @@
         els.jobProgressValue.textContent = `${job.progress}%`;
         currentCurrencySymbol = report.summary.currency_symbol || (report.summary.platform === "taobao" ? "¥" : "$");
         const sourceLabel = report.source === "live_data" || report.source === "apify"
-          ? "实时数据源"
+          ? t("src_live")
           : report.source === "cached_snapshot" || report.source === "cached_apify_snapshot"
-            ? "数据快照"
+            ? t("src_snapshot")
             : report.source === "mock"
-              ? "报告数据"
-              : "报告数据";
-        els.jobSummary.textContent += ` · 来源：${sourceLabel}`;
+              ? t("src_report")
+              : t("src_report");
+        els.jobSummary.textContent += `${t("source_prefix")}${sourceLabel}`;
         els.apiHealth.textContent = sourceLabel;
 
         const metrics = report.metrics || {};
         const recommendation = report.recommendation || {};
         els.recommendationBox.innerHTML = `
           <div style="display:grid; gap:8px;">
-            <div><strong>定位：</strong> ${recommendation.positioning || "—"}</div>
-            <div><strong>建议价格：</strong> ${currency(recommendation.suggested_price)}</div>
-            <div><strong>商品数：</strong> ${metrics.product_count ?? "—"} · <strong>评分：</strong> ${metrics.avg_rating ?? "—"} · <strong>评论：</strong> ${metrics.review_total ?? "—"}</div>
+            <div><strong>${t("reco_positioning")}</strong> ${recommendation.positioning || "—"}</div>
+            <div><strong>${t("reco_price")}</strong> ${currency(recommendation.suggested_price)}</div>
+            <div><strong>${t("reco_counts")}</strong> ${metrics.product_count ?? "—"} · <strong>${t("reco_rating")}</strong> ${metrics.avg_rating ?? "—"} · <strong>${t("reco_reviews")}</strong> ${metrics.review_total ?? "—"}</div>
           </div>
         `;
 
         currentReport = report;
         populateBrandFilter(report.top_competitors || []);
         updateFilteredReport();
-        renderList(els.painPoints, report.voc?.pain_points || [], "暂无痛点。");
-        renderList(els.sellingPoints, report.voc?.selling_points || [], "暂无卖点。");
-        renderList(els.visualStyle, report.voc?.visual_style || [], "暂无视觉风格。");
+        renderList(els.painPoints, report.voc?.pain_points || [], t("empty_pain"));
+        renderList(els.sellingPoints, report.voc?.selling_points || [], t("empty_selling"));
+        renderList(els.visualStyle, report.voc?.visual_style || [], t("empty_visual"));
       };
 
       const renderJob = (job) => {
@@ -964,7 +1400,7 @@
 
       const loadSamplePreview = async (keyword = "") => {
         try {
-          setNotice("正在加载真实数据快照", "loading");
+          setNotice(t("loading_snapshot"), "loading");
           const response = await fetch(SAMPLE_URL);
           if (!response.ok) {
             throw new Error(`Sample load failed (${response.status})`);
@@ -984,11 +1420,11 @@
             error_message: null,
             report,
           });
-          setNotice("真实数据快照已加载");
-          els.apiHealth.textContent = "数据快照已加载";
+          setNotice(t("snapshot_loaded"));
+          els.apiHealth.textContent = t("snapshot_loaded_health");
         } catch (error) {
-          setNotice(error.message || "数据快照加载失败", "error");
-          els.apiHealth.textContent = "数据快照加载失败";
+          setNotice(error.message || t("snapshot_fail"), "error");
+          els.apiHealth.textContent = t("snapshot_fail");
         }
       };
 
@@ -1003,12 +1439,12 @@
 
           if (job.status === "completed" || job.status === "failed") {
             stopPolling();
-            setNotice(job.status === "completed" ? "报告已生成" : job.error_message || "任务失败", job.status === "completed" ? "ready" : "error");
+            setNotice(job.status === "completed" ? t("report_ready") : job.error_message || t("task_failed"), job.status === "completed" ? "ready" : "error");
           }
         } catch (error) {
           stopPolling();
-          setNotice(error.message || "网络错误", "error");
-          els.apiHealth.textContent = "数据读取失败";
+          setNotice(error.message || t("net_error"), "error");
+          els.apiHealth.textContent = t("data_read_fail");
         }
       };
 
@@ -1021,17 +1457,17 @@
       const createJob = async () => {
         const keyword = els.keywordInput.value.trim();
         if (!keyword) {
-          setNotice("请输入关键词后开始分析", "error");
-          els.apiHealth.textContent = "等待关键词";
-          els.jobState.textContent = "请输入关键词，例如 wireless mouse。";
+          setNotice(t("need_keyword"), "error");
+          els.apiHealth.textContent = t("wait_keyword");
+          els.jobState.textContent = t("keyword_hint");
           els.keywordInput.focus();
           return;
         }
 
         els.analyzeBtn.disabled = true;
         els.keywordInput.disabled = true;
-        setNotice("正在提交任务", "loading");
-        els.apiHealth.textContent = "正在创建报告任务";
+        setNotice(t("submitting"), "loading");
+        els.apiHealth.textContent = t("creating_job");
         setActiveStatus("queued");
 
         try {
@@ -1055,26 +1491,26 @@
             } catch (_error) {
               // Keep the HTTP status when the API does not return JSON.
             }
-            throw new Error(errorPayload.error_message || errorPayload.error || `任务创建失败（${response.status}）`);
+            throw new Error(errorPayload.error_message || errorPayload.error || t("create_fail", { status: response.status }));
           }
 
           const job = await response.json();
           renderJob(job);
           if (job.report || job.status === "completed" || job.status === "failed") {
             stopPolling();
-            setNotice(job.status === "completed" ? "报告已生成" : job.error_message || "任务失败", job.status === "completed" ? "ready" : "error");
+            setNotice(job.status === "completed" ? t("report_ready") : job.error_message || t("task_failed"), job.status === "completed" ? "ready" : "error");
             return;
           }
-          els.apiHealth.textContent = "任务已排队";
-          els.jobState.textContent = `任务 ID ${job.job_id}`;
+          els.apiHealth.textContent = t("queued_ok");
+          els.jobState.textContent = t("job_id", { id: job.job_id });
           els.jobTitle.textContent = `${keyword} / ${job.status}`;
           els.jobProgressValue.textContent = `${job.progress}%`;
           startPolling(job.job_id);
         } catch (error) {
           stopPolling();
-          setNotice(error.message || "网络错误", "error");
-          els.apiHealth.textContent = "数据请求失败";
-          els.jobState.textContent = error.message || "请求失败";
+          setNotice(error.message || t("net_error"), "error");
+          els.apiHealth.textContent = t("data_req_fail");
+          els.jobState.textContent = error.message || t("req_fail");
         }
       };
 
@@ -1094,21 +1530,21 @@
           els.platformSelect.value = INITIAL_PLATFORM;
         }
         els.keywordInput.focus();
-        setNotice("就绪");
+        setNotice(t("tone_ready"));
         setActiveStatus("queued");
-        els.jobTitle.textContent = "等待分析";
-        els.jobSummary.textContent = "输入关键词后，系统会创建报告任务并返回分析结果。";
-        els.jobMeta.textContent = "暂无任务";
-        els.jobState.textContent = "提交后会创建一个 Amazon 分析任务。";
+        els.jobTitle.textContent = t("job_wait_title");
+        els.jobSummary.textContent = t("job_wait_summary");
+        els.jobMeta.textContent = t("job_no_task");
+        els.jobState.textContent = t("job_submit_hint");
         els.jobProgressValue.textContent = "--";
-        els.recommendationBox.textContent = "等待报告。";
+        els.recommendationBox.textContent = t("wait_report");
         renderPriceChart([]);
         renderCompetitors([]);
         renderRawTable([]);
         clearMarketReport();
-        renderList(els.painPoints, [], "暂无痛点。");
-        renderList(els.sellingPoints, [], "暂无卖点。");
-        renderList(els.visualStyle, [], "暂无视觉风格。");
+        renderList(els.painPoints, [], t("empty_pain"));
+        renderList(els.sellingPoints, [], t("empty_selling"));
+        renderList(els.visualStyle, [], t("empty_visual"));
       });
 
       els.reportsBtn.addEventListener("click", () => {
@@ -1136,18 +1572,67 @@
       if (DATA_MODE === "sample") {
         void loadSamplePreview(INITIAL_KEYWORD);
       } else {
-        setNotice("就绪");
+        setNotice(t("tone_ready"));
         renderPriceChart([]);
         renderCompetitors([]);
         renderRawTable([]);
         clearMarketReport();
-        renderList(els.painPoints, [], "暂无痛点。");
-        renderList(els.sellingPoints, [], "暂无卖点。");
-        renderList(els.visualStyle, [], "暂无视觉风格。");
+        renderList(els.painPoints, [], t("empty_pain"));
+        renderList(els.sellingPoints, [], t("empty_selling"));
+        renderList(els.visualStyle, [], t("empty_visual"));
         if (AUTORUN) {
           void createJob();
         }
       }
+
+      window.onLangChange = () => {
+        // Re-render dynamic report UI in the new language
+        if (currentReport) {
+          updateFilteredReport();
+          const jobLike = {
+            status: "completed",
+            progress: 100,
+            job_id: "—",
+            keyword: currentReport.summary?.keyword || "",
+            platform: currentReport.summary?.platform || "amazon",
+            locale: currentReport.summary?.locale || "US",
+            top_n: currentReport.summary?.top_n || 50,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            error_message: null,
+            report: currentReport,
+          };
+          // Keep recommendation / voc labels refreshed
+          renderList(els.painPoints, currentReport.voc?.pain_points || [], t("empty_pain"));
+          renderList(els.sellingPoints, currentReport.voc?.selling_points || [], t("empty_selling"));
+          renderList(els.visualStyle, currentReport.voc?.visual_style || [], t("empty_visual"));
+          const recommendation = currentReport.recommendation || {};
+          const metrics = currentReport.metrics || {};
+          els.recommendationBox.innerHTML = `
+            <div style="display:grid; gap:8px;">
+              <div><strong>${t("reco_positioning")}</strong> ${recommendation.positioning || "—"}</div>
+              <div><strong>${t("reco_price")}</strong> ${currency(recommendation.suggested_price)}</div>
+              <div><strong>${t("reco_counts")}</strong> ${metrics.product_count ?? "—"} · <strong>${t("reco_rating")}</strong> ${metrics.avg_rating ?? "—"} · <strong>${t("reco_reviews")}</strong> ${metrics.review_total ?? "—"}</div>
+            </div>
+          `;
+        } else {
+          clearMarketReport();
+          renderPriceChart([]);
+          renderCompetitors([]);
+          renderRawTable([]);
+          renderList(els.painPoints, [], t("empty_pain"));
+          renderList(els.sellingPoints, [], t("empty_selling"));
+          renderList(els.visualStyle, [], t("empty_visual"));
+          els.recommendationBox.textContent = t("wait_report");
+        }
+        // refresh notice label only if still ready-looking
+        if (els.apiNotice && els.apiNotice.innerHTML.indexOf("<strong>") >= 0) {
+          // leave detailed notice; chips already have data-i18n
+        }
+      };
+      bindLangToggle();
+      applyLang(currentLang);
+
     </script>
   </body>
 </html>

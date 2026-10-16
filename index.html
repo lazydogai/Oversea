@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-i18n-title="doc_title">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -43,6 +43,31 @@
       .nav a, .ghost { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 13px; font-size: 14px; }
       .primary { border: 1px solid var(--ink); background: var(--ink); color: var(--surface); padding: 10px 16px; font-size: 14px; }
       .primary:hover { background: var(--accent); border-color: var(--accent); }
+
+      .lang-toggle {
+        display: inline-flex;
+        border: 1px solid var(--line, #d9d9dd);
+        overflow: hidden;
+        height: 40px;
+      }
+      .lang-toggle button {
+        border: 0;
+        border-right: 1px solid var(--line, #d9d9dd);
+        background: var(--surface, #fff);
+        color: var(--ink, #111);
+        padding: 0 12px;
+        height: 100%;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .lang-toggle button:last-child { border-right: 0; }
+      .lang-toggle button.active {
+        background: var(--ink, #111);
+        color: var(--surface, #fff);
+      }
+
       .hero { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr); border-bottom: 1px solid var(--line); }
       .hero-copy { padding: clamp(32px, 7vw, 72px) clamp(20px, 5vw, 56px); border-right: 1px solid var(--line); }
       .eyebrow { color: var(--accent); font-size: 13px; font-weight: 700; margin: 0 0 16px; }
@@ -117,59 +142,64 @@
   </head>
   <body>
     <main class="app">
-      <aside class="rail" aria-label="页面标识">
+      <aside class="rail" data-i18n-aria="aria_rail">
         <div class="mark"></div>
         <div class="rail-text">COMPETITOR INTELLIGENCE</div>
       </aside>
       <div class="page">
         <header class="topbar">
-          <a class="brand" href="#top" aria-label="返回顶部">
-            <strong>竞品搜索分析平台</strong>
-            <span>Amazon 市场报告 · Listing 洞察</span>
+          <a class="brand" href="#top" data-i18n-aria="aria_top">
+            <strong data-i18n="brand_name">竞品搜索分析平台</strong>
+            <span data-i18n="brand_sub">Amazon 市场报告 · Listing 洞察</span>
           </a>
-          <nav class="nav" aria-label="主导航">
-            <a href="#features">功能</a>
-            <a href="#report">报表</a>
-            <a href="preview/index.html?top_n=50&v=live-v1">进入报告</a>
+          <nav class="nav" data-i18n-aria="aria_nav">
+            <a href="#features" data-i18n="nav_features">功能</a>
+            <a href="#report" data-i18n="nav_report">报表</a>
+            <a href="briefs/yoga-pro-mouse.html" data-i18n="nav_brief">市调简报</a>
+            <a href="preview/index.html?top_n=50&v=live-v1" data-i18n="nav_enter">进入报告</a>
+            <div class="lang-toggle" role="group" aria-label="Language">
+              <button type="button" data-lang="zh">中文</button>
+              <button type="button" data-lang="en">EN</button>
+            </div>
           </nav>
         </header>
 
         <section id="top" class="hero">
           <div class="hero-copy">
             <p class="eyebrow">V1 MARKET REPORT</p>
-            <h1>输入关键词，生成可交付的竞品分析报告。</h1>
-            <p class="lead">为跨境卖家快速整理搜索结果、价格区间、评分分布、品牌集中度、图片与商品链接，并转成 Listing 优化方向。</p>
+            <h1 data-i18n="hero_h1">输入关键词，生成可交付的竞品分析报告。</h1>
+            <p class="lead" data-i18n="hero_lead">为跨境卖家快速整理搜索结果、价格区间、评分分布、品牌集中度、图片与商品链接，并转成 Listing 优化方向。</p>
             <form class="search-card" id="searchForm">
               <div class="search-row">
-                <input id="keywordInput" name="keyword" value="" placeholder="例如：wireless mouse" aria-label="关键词" autocomplete="off" />
-                <button type="submit">开始分析</button>
+                <input id="keywordInput" name="keyword" value="" data-i18n-placeholder="ph_keyword" placeholder="例如：wireless mouse" data-i18n-aria="aria_keyword" autocomplete="off" />
+                <button type="submit" data-i18n="btn_analyze">开始分析</button>
               </div>
               <div class="search-meta">
-                <span>搜索范围：Top 50</span>
-                <span>报告语言：简体中文</span>
-                <span>输出：图表 + 商品表 + 洞察</span>
+                <span data-i18n="meta_scope">搜索范围：Top 50</span>
+                <span data-i18n="meta_lang">报告语言：简体中文</span>
+                <span data-i18n="meta_out">输出：图表 + 商品表 + 洞察</span>
               </div>
             </form>
-            <div class="loading" id="loadingBox">正在准备报告页面，会用当前关键词进入报告。</div>
+            <div class="loading" id="loadingBox" data-i18n="loading_prep">正在准备报告页面，会用当前关键词进入报告。</div>
           </div>
 
-          <div class="hero-panel" aria-label="报告摘要">
+          <div class="hero-panel" data-i18n-aria="aria_summary">
             <div class="report-card">
               <div class="report-head">
                 <div>
-                  <h2>市场报告摘要</h2>
-                  <p class="label">输入关键词后生成</p>
+                  <h2 data-i18n="summary_title">市场报告摘要</h2>
+                  <p class="label" data-i18n="summary_sub">输入关键词后生成</p>
                 </div>
-                <span class="badge">待搜索</span>
+                <span class="badge" data-i18n="badge_wait">待搜索</span>
               </div>
               <div class="kpis">
-                <div class="kpi"><p>样本商品</p><strong>—</strong></div>
-                <div class="kpi"><p>价格中位数</p><strong>—</strong></div>
-                <div class="kpi"><p>平均评分</p><strong>—</strong></div>
-                <div class="kpi"><p>重点品牌</p><strong>—</strong></div>
+                <div class="kpi"><p data-i18n="kpi_products">样本商品</p><strong>—</strong></div>
+                <div class="kpi"><p data-i18n="kpi_median">价格中位数</p><strong>—</strong></div>
+                <div class="kpi"><p data-i18n="kpi_rating">平均评分</p><strong>—</strong></div>
+                <div class="kpi"><p data-i18n="kpi_brand">重点品牌</p><strong>—</strong></div>
               </div>
-                            <div class="bars" aria-label="价格分布">
-                <div style="grid-column: 1 / -1; align-self: center; color: var(--muted); font-size: 13px;">完成一次搜索后显示价格分布</div>
+              <div class="bars" data-i18n-aria="aria_price_dist">
+                <div style="grid-column: 1 / -1; align-self: center; color: var(--muted); font-size: 13px;" data-i18n="bars_empty">完成一次搜索后显示价格分布</div>
               </div>
             </div>
           </div>
@@ -177,88 +207,303 @@
 
         <section id="features" class="section">
           <div class="section-title">
-            <h2>V1 核心能力</h2>
-            <p>平台聚焦客户最关心的结果：搜到什么、价格在哪里、对手怎么卖、我们应该怎样切入。</p>
+            <h2 data-i18n="feat_title">V1 核心能力</h2>
+            <p data-i18n="feat_lead">平台聚焦客户最关心的结果：搜到什么、价格在哪里、对手怎么卖、我们应该怎样切入。</p>
           </div>
           <div class="grid-3">
             <article class="feature">
               <span>01</span>
-              <h3>关键词即时搜索</h3>
-              <p>用户输入关键词后，系统按 Top 50 范围收集商品资料，并把每次搜索转成可复查的报告。</p>
+              <h3 data-i18n="feat1_h">关键词即时搜索</h3>
+              <p data-i18n="feat1_p">用户输入关键词后，系统按 Top 50 范围收集商品资料，并把每次搜索转成可复查的报告。</p>
             </article>
             <article class="feature">
               <span>02</span>
-              <h3>竞品结构分析</h3>
-              <p>价格分布、评分分布、评论量、品牌集中度会集中呈现，方便判断市场是否拥挤和机会位在哪里。</p>
+              <h3 data-i18n="feat2_h">竞品结构分析</h3>
+              <p data-i18n="feat2_p">价格分布、评分分布、评论量、品牌集中度会集中呈现，方便判断市场是否拥挤和机会位在哪里。</p>
             </article>
             <article class="feature">
               <span>03</span>
-              <h3>商品图片与链接</h3>
-              <p>报告表格会保留商品图、价格、评分、评论数与原商品链接，适合给运营和客户一起复盘。</p>
+              <h3 data-i18n="feat3_h">商品图片与链接</h3>
+              <p data-i18n="feat3_p">报告表格会保留商品图、价格、评分、评论数与原商品链接，适合给运营和客户一起复盘。</p>
             </article>
           </div>
         </section>
 
         <section id="report" class="section">
           <div class="section-title">
-            <h2>报表呈现方式</h2>
-            <p>用户可以按价格、评分、评论数和品牌过滤，快速从一堆商品里筛出高价位机会、低评分痛点和头部竞品。</p>
+            <h2 data-i18n="report_title">报表呈现方式</h2>
+            <p data-i18n="report_lead">用户可以按价格、评分、评论数和品牌过滤，快速从一堆商品里筛出高价位机会、低评分痛点和头部竞品。</p>
           </div>
           <div class="dashboard">
-            <aside class="filters" aria-label="筛选器示意">
+            <aside class="filters" data-i18n-aria="aria_filters">
               <div class="field">
-                <label for="ratingFilter">最低评分</label>
+                <label for="ratingFilter" data-i18n="filter_rating">最低评分</label>
                 <select id="ratingFilter">
-                  <option>不限</option>
-                  <option>4.5 星以上</option>
-                  <option>4.0 星以上</option>
+                  <option data-i18n="opt_any">不限</option>
+                  <option data-i18n="opt_45">4.5 星以上</option>
+                  <option data-i18n="opt_40">4.0 星以上</option>
                 </select>
               </div>
               <div class="field">
-                <label for="priceFilter">价格区间</label>
+                <label for="priceFilter" data-i18n="filter_price">价格区间</label>
                 <select id="priceFilter">
-                  <option>全部价格</option>
+                  <option data-i18n="opt_all_price">全部价格</option>
                   <option>$0 - $25</option>
                   <option>$25 - $50</option>
-                  <option>$50 以上</option>
+                  <option data-i18n="opt_50plus">$50 以上</option>
                 </select>
               </div>
               <div class="field">
-                <label for="brandFilter">品牌</label>
-                <input id="brandFilter" value="全部品牌" />
+                <label for="brandFilter" data-i18n="filter_brand">品牌</label>
+                <input id="brandFilter" data-i18n-placeholder="ph_all_brands" value="全部品牌" />
               </div>
             </aside>
-            <div class="table-wrap"><div style="padding: 24px; color: var(--muted);">完成一次搜索后，这里会显示商品图片、价格、评分、评论数和商品链接。</div></div>
+            <div class="table-wrap"><div style="padding: 24px; color: var(--muted);" data-i18n="table_empty">完成一次搜索后，这里会显示商品图片、价格、评分、评论数和商品链接。</div></div>
           </div>
         </section>
 
         <section class="section cta">
           <div>
-            <h2>从关键词到市场报告的入口。</h2>
-            <p>用户输入关键词后即可进入报告页面，查看价格、评分、品牌集中度、商品图片、链接与 Listing 建议。</p>
+            <h2 data-i18n="cta_h">从关键词到市场报告的入口。</h2>
+            <p data-i18n="cta_p">用户输入关键词后即可进入报告页面，查看价格、评分、品牌集中度、商品图片、链接与 Listing 建议。</p>
           </div>
-          <a class="primary" href="preview/index.html?top_n=50&v=live-v1">进入市场报告</a>
+          <a class="primary" id="ctaReportLink" href="preview/index.html?top_n=50&v=live-v1" data-i18n="cta_btn">进入市场报告</a>
         </section>
 
         <footer>
-          <span>© 2026 竞品搜索分析平台 · V1</span>
+          <span data-i18n="footer">© 2026 竞品搜索分析平台 · V1</span>
         </footer>
       </div>
     </main>
     <script>
+      const I18N = {
+        zh: {
+          doc_title: "竞品搜索分析平台",
+          brand_name: "竞品搜索分析平台",
+          brand_sub: "Amazon 市场报告 · Listing 洞察",
+          nav_features: "功能",
+          nav_report: "报表",
+          nav_brief: "市调简报",
+          nav_enter: "进入报告",
+          aria_rail: "页面标识",
+          aria_top: "返回顶部",
+          aria_nav: "主导航",
+          aria_keyword: "关键词",
+          aria_summary: "报告摘要",
+          aria_price_dist: "价格分布",
+          aria_filters: "筛选器示意",
+          hero_h1: "输入关键词，生成可交付的竞品分析报告。",
+          hero_lead: "为跨境卖家快速整理搜索结果、价格区间、评分分布、品牌集中度、图片与商品链接，并转成 Listing 优化方向。",
+          ph_keyword: "例如：wireless mouse",
+          btn_analyze: "开始分析",
+          meta_scope: "搜索范围：Top 50",
+          meta_lang: "报告语言：简体中文",
+          meta_out: "输出：图表 + 商品表 + 洞察",
+          loading_prep: "正在准备报告页面，会用当前关键词进入报告。",
+          loading_open: "正在打开 {keyword} 的 V1 报告...",
+          summary_title: "市场报告摘要",
+          summary_sub: "输入关键词后生成",
+          badge_wait: "待搜索",
+          kpi_products: "样本商品",
+          kpi_median: "价格中位数",
+          kpi_rating: "平均评分",
+          kpi_brand: "重点品牌",
+          bars_empty: "完成一次搜索后显示价格分布",
+          feat_title: "V1 核心能力",
+          feat_lead: "平台聚焦客户最关心的结果：搜到什么、价格在哪里、对手怎么卖、我们应该怎样切入。",
+          feat1_h: "关键词即时搜索",
+          feat1_p: "用户输入关键词后，系统按 Top 50 范围收集商品资料，并把每次搜索转成可复查的报告。",
+          feat2_h: "竞品结构分析",
+          feat2_p: "价格分布、评分分布、评论量、品牌集中度会集中呈现，方便判断市场是否拥挤和机会位在哪里。",
+          feat3_h: "商品图片与链接",
+          feat3_p: "报告表格会保留商品图、价格、评分、评论数与原商品链接，适合给运营和客户一起复盘。",
+          report_title: "报表呈现方式",
+          report_lead: "用户可以按价格、评分、评论数和品牌过滤，快速从一堆商品里筛出高价位机会、低评分痛点和头部竞品。",
+          filter_rating: "最低评分",
+          filter_price: "价格区间",
+          filter_brand: "品牌",
+          opt_any: "不限",
+          opt_45: "4.5 星以上",
+          opt_40: "4.0 星以上",
+          opt_all_price: "全部价格",
+          opt_50plus: "$50 以上",
+          ph_all_brands: "全部品牌",
+          table_empty: "完成一次搜索后，这里会显示商品图片、价格、评分、评论数和商品链接。",
+          cta_h: "从关键词到市场报告的入口。",
+          cta_p: "用户输入关键词后即可进入报告页面，查看价格、评分、品牌集中度、商品图片、链接与 Listing 建议。",
+          cta_btn: "进入市场报告",
+          footer: "© 2026 竞品搜索分析平台 · V1",
+        },
+        en: {
+          doc_title: "Competitor Search Analytics",
+          brand_name: "Competitor Search Analytics",
+          brand_sub: "Amazon market report · Listing insights",
+          nav_features: "Features",
+          nav_report: "Reports",
+          nav_brief: "Market brief",
+          nav_enter: "Open report",
+          aria_rail: "Page mark",
+          aria_top: "Back to top",
+          aria_nav: "Main navigation",
+          aria_keyword: "Keyword",
+          aria_summary: "Report summary",
+          aria_price_dist: "Price distribution",
+          aria_filters: "Filter preview",
+          hero_h1: "Enter a keyword. Get a deliverable competitor report.",
+          hero_lead: "Built for cross-border sellers: search results, price bands, rating mix, brand concentration, images and product links—turned into Listing optimization directions.",
+          ph_keyword: "e.g. wireless mouse",
+          btn_analyze: "Analyze",
+          meta_scope: "Scope: Top 50",
+          meta_lang: "Report language: English",
+          meta_out: "Output: charts + table + insights",
+          loading_prep: "Preparing the report page with your keyword…",
+          loading_open: "Opening the V1 report for {keyword}…",
+          summary_title: "Market report snapshot",
+          summary_sub: "Generated after you search",
+          badge_wait: "Awaiting search",
+          kpi_products: "Sample products",
+          kpi_median: "Median price",
+          kpi_rating: "Avg. rating",
+          kpi_brand: "Lead brand",
+          bars_empty: "Price distribution appears after a search",
+          feat_title: "V1 core capabilities",
+          feat_lead: "We focus on what sellers care about: what shows up, where prices sit, how rivals sell, and how you should enter.",
+          feat1_h: "Instant keyword search",
+          feat1_p: "After you enter a keyword, the system collects Top 50 product data and turns each search into a reviewable report.",
+          feat2_h: "Competitive structure",
+          feat2_p: "Price distribution, ratings, review volume, and brand concentration in one view—so you can spot crowding and white space.",
+          feat3_h: "Images & product links",
+          feat3_p: "The report table keeps product images, price, rating, review count, and original links—ready for ops and client reviews.",
+          report_title: "How the report is presented",
+          report_lead: "Filter by price, rating, reviews, and brand to surface premium opportunities, low-rating pain points, and head competitors.",
+          filter_rating: "Min. rating",
+          filter_price: "Price range",
+          filter_brand: "Brand",
+          opt_any: "Any",
+          opt_45: "4.5+ stars",
+          opt_40: "4.0+ stars",
+          opt_all_price: "All prices",
+          opt_50plus: "$50+",
+          ph_all_brands: "All brands",
+          table_empty: "After a search, this area shows product images, price, rating, reviews, and links.",
+          cta_h: "From keyword to market report.",
+          cta_p: "Enter a keyword to open the report: prices, ratings, brand concentration, images, links, and Listing suggestions.",
+          cta_btn: "Open market report",
+          footer: "© 2026 Competitor Search Analytics · V1",
+        },
+      };
+
+      const I18N_STORAGE_KEY = "oversea_lang";
+      function detectLang() {
+        const params = new URLSearchParams(window.location.search);
+        const fromUrl = (params.get("lang") || "").toLowerCase();
+        if (fromUrl === "en" || fromUrl === "zh" || fromUrl === "zh-cn") {
+          return fromUrl.startsWith("zh") ? "zh" : "en";
+        }
+        try {
+          const stored = localStorage.getItem(I18N_STORAGE_KEY);
+          if (stored === "en" || stored === "zh") return stored;
+        } catch (_e) {}
+        return "zh";
+      }
+      let currentLang = detectLang();
+      function t(key, vars) {
+        const dict = (I18N[currentLang] || I18N.zh || {});
+        let s = dict[key];
+        if (s === undefined || s === null) {
+          s = (I18N.zh || {})[key];
+        }
+        if (s === undefined || s === null) return key;
+        if (vars && typeof vars === "object") {
+          Object.keys(vars).forEach((k) => {
+            s = String(s).split("{" + k + "}").join(String(vars[k]));
+          });
+        }
+        return s;
+      }
+      function applyLang(lang) {
+        currentLang = lang === "en" ? "en" : "zh";
+        document.documentElement.lang = currentLang === "en" ? "en" : "zh-CN";
+        try { localStorage.setItem(I18N_STORAGE_KEY, currentLang); } catch (_e) {}
+        const params = new URLSearchParams(window.location.search);
+        params.set("lang", currentLang);
+        const next = `${window.location.pathname}?${params.toString()}${window.location.hash || ""}`;
+        window.history.replaceState({}, "", next);
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          if (!key) return;
+          el.textContent = t(key);
+        });
+        document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-html");
+          if (!key) return;
+          el.innerHTML = t(key);
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-placeholder");
+          if (!key) return;
+          el.setAttribute("placeholder", t(key));
+        });
+        document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-aria");
+          if (!key) return;
+          el.setAttribute("aria-label", t(key));
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-title");
+          if (!key) return;
+          document.title = t(key);
+        });
+        document.querySelectorAll(".lang-toggle button").forEach((btn) => {
+          btn.classList.toggle("active", btn.getAttribute("data-lang") === currentLang);
+        });
+        if (typeof window.onLangChange === "function") {
+          window.onLangChange(currentLang);
+        }
+      }
+      function bindLangToggle() {
+        document.querySelectorAll(".lang-toggle button").forEach((btn) => {
+          btn.addEventListener("click", () => applyLang(btn.getAttribute("data-lang")));
+        });
+      }
+
       const form = document.getElementById("searchForm");
       const input = document.getElementById("keywordInput");
       const loading = document.getElementById("loadingBox");
+      const brandFilter = document.getElementById("brandFilter");
+
+      window.onLangChange = () => {
+        if (brandFilter && (!brandFilter.value || brandFilter.dataset.i18nDefault === "1" || brandFilter.value === I18N.zh.ph_all_brands || brandFilter.value === I18N.en.ph_all_brands)) {
+          brandFilter.value = t("ph_all_brands");
+          brandFilter.dataset.i18nDefault = "1";
+        }
+        document.querySelectorAll("a[href]").forEach((a) => {
+          const href = a.getAttribute("href") || "";
+          if (!href.includes("preview/") && !href.includes("briefs/")) return;
+          try {
+            const u = new URL(href, window.location.href);
+            u.searchParams.set("lang", currentLang);
+            if (href.includes("preview/")) {
+              a.setAttribute("href", "preview/index.html?" + u.searchParams.toString());
+            } else if (href.includes("briefs/")) {
+              const name = u.pathname.split("/").pop();
+              a.setAttribute("href", "briefs/" + name + "?" + u.searchParams.toString());
+            }
+          } catch (_e) {}
+        });
+      };
+
       form.addEventListener("submit", (event) => {
         event.preventDefault();
         const keyword = input.value.trim();
         loading.classList.add("show");
-        loading.textContent = `正在打开 ${keyword} 的 V1 报告...`;
+        loading.textContent = t("loading_open", { keyword: keyword || "…" });
         const params = new URLSearchParams({
           top_n: "50",
           v: "live-v1",
           q: keyword,
           autorun: "1",
+          lang: currentLang,
         });
         const configuredApi = new URLSearchParams(window.location.search).get("api");
         if (configuredApi) {
@@ -268,11 +513,9 @@
           window.location.href = `preview/index.html?${params.toString()}`;
         }, 450);
       });
+
+      bindLangToggle();
+      applyLang(currentLang);
     </script>
   </body>
 </html>
-
-
-
-
-
